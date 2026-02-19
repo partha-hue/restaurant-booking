@@ -10,7 +10,8 @@ import dbConnect from "./dbconection";
 import nodemailer from "nodemailer";
 
 export const authOptions: NextAuthOptions = {
-  adapter: MongoDBAdapter(clientPromise),
+  // @ts-ignore
+  adapter: MongoDBAdapter(clientPromise) as any,
   providers: [
     CredentialsProvider({
       name: "Credentials",
