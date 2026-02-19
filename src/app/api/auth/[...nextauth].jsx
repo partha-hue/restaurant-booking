@@ -7,7 +7,7 @@ import { compare } from "bcryptjs";
 
 const prisma = new PrismaClient();
 
-export default NextAuth({
+const authOptions = {
   providers: [
     // Email & Password
     CredentialsProvider({
@@ -17,6 +17,8 @@ export default NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+        
         const user = await prisma.user.findUnique({
           where: { email: credentials.email }
         });
@@ -31,14 +33,14 @@ export default NextAuth({
 
     // Google Login
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || ""
     }),
 
     // Facebook Login
     FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET
+      clientId: process.env.FACEBOOK_CLIENT_ID || "",
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET || ""
     })
   ],
 
@@ -50,8 +52,12 @@ export default NextAuth({
       return token;
     },
     async session({ session, token }) {
-      if (token) session.user.id = token.id;
+      if (session.user && token) {
+        session.user.id = token.id;
+      }
       return session;
     }
   }
-});
+};
+
+export default NextAuth(authOptions);
