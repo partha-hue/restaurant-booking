@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Moon, Sun, ShoppingCart, User, X } from "lucide-react";
@@ -36,7 +37,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <img src="/foodhub-logo.svg" alt="Food Hub Logo" className="w-10 h-10" />
+            <Image src="/foodhub-logo.svg" alt="Food Hub Logo" width={40} height={40} className="w-10 h-10" />
             <span className="text-2xl font-bold text-primary dark:text-yellow-400">
               FoodHub
             </span>
