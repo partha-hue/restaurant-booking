@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import React from 'react'
 
 export default function AboutPage(): React.JSX.Element {
@@ -9,7 +10,7 @@ export default function AboutPage(): React.JSX.Element {
         {/* Animated Navbar */}
         <nav className="w-full flex justify-between items-center px-8 py-4 bg-scroll bg-sky-300/80 shadow-md sticky top-0 z-20 animate-navbar-fade-in">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/")}> 
-            <img src="/globe.svg" alt="Food Hub Logo" className="w-8 h-8 animate-spin-slow" />
+            <Image src="/globe.svg" alt="Food Hub Logo" width={32} height={32} className="animate-spin-slow" />
             <span className="font-bold text-xl text-primary">Food Hub</span>
           </div>
           <div className="flex gap-4">
@@ -23,8 +24,10 @@ export default function AboutPage(): React.JSX.Element {
       <div className="w-full max-w-2xl">
         <div className="hero rounded-xl shadow-xl bg-white/80 animate-fade-in-up">
           <div className="hero-content flex-col lg:flex-row-reverse">
-            <img
+            <Image
               src="/foodhub-logo.svg"
+              width={320}
+              height={320}
               className="max-w-xs rounded-lg shadow-2xl animate-bounce"
               alt="About Food Hub"
             />
