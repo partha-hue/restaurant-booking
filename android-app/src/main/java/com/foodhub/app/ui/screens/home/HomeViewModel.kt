@@ -3,22 +3,29 @@ package com.foodhub.app.ui.screens.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.foodhub.app.domain.model.Restaurant
+import com.foodhub.app.domain.usecase.GetAiRecommendationsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 sealed class HomeUiState {
     object Loading : HomeUiState()
-    data class Success(val restaurants: List<Restaurant>) : HomeUiState()
+    data class Success(
+        val restaurants: List<Restaurant>,
+        val aiRecommendations: List<Restaurant> = emptyList()
+    ) : HomeUiState()
     data class Error(val message: String) : HomeUiState()
 }
 
 @HiltViewModel
-class HomeViewModel @Inject constructor() : ViewModel() {
+class HomeViewModel @Inject constructor(
+    private val aiUseCase: GetAiRecommendationsUseCase
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
@@ -42,6 +49,16 @@ class HomeViewModel @Inject constructor() : ViewModel() {
             )
             
             _uiState.value = HomeUiState.Success(mockRestaurants)
+
+            // Trigger AI Recommendations based on fake history
+            val fakeHistory = listOf("Burger", "Pizza")
+            aiUseCase(fakeHistory, mockRestaurants).collectLatest { aiResult ->
+                if (_uiState.value is HomeUiState.Success) {
+                    _uiState.value = (_uiState.value as HomeUiState.Success).copy(
+                        aiRecommendations = aiResult
+                    )
+                }
+            }
         }
     }
 }

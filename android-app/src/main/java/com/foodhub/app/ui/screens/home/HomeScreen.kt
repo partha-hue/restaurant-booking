@@ -2,9 +2,12 @@ package com.foodhub.app.ui.screens.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSize
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
@@ -14,9 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,10 +46,17 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 is HomeUiState.Success -> {
-                    RestaurantGrid(state.restaurants)
+                    RestaurantContent(
+                        restaurants = state.restaurants,
+                        aiRecommendations = state.aiRecommendations
+                    )
                 }
                 is HomeUiState.Error -> {
-                    Text(text = state.message, color = Color.Red, modifier = Modifier.align(Alignment.Center))
+                    Text(
+                        text = state.message,
+                        color = Color.Red,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
             }
         }
@@ -56,13 +64,45 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
 }
 
 @Composable
-fun RestaurantGrid(restaurants: List<Restaurant>) {
+fun RestaurantContent(restaurants: List<Restaurant>, aiRecommendations: List<Restaurant>) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         contentPadding = PaddingValues(12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        // AI Recommendations Section
+        if (aiRecommendations.isNotEmpty()) {
+            item(span = { GridItemSize(2) }) {
+                Column {
+                    Text(
+                        text = "AI Recommended for You",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(vertical = 4.dp)
+                    ) {
+                        items(aiRecommendations) { restaurant ->
+                            Box(modifier = Modifier.width(280.dp)) {
+                                RestaurantCard(restaurant)
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "All Restaurants",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+            }
+        }
+
+        // Regular Grid
         items(restaurants) { restaurant ->
             RestaurantCard(restaurant)
         }
@@ -81,16 +121,15 @@ fun RestaurantCard(restaurant: Restaurant) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)
-                    .background(Color.LightGray) // Placeholder for image
+                    .background(Color.LightGray)
             ) {
-                // In a real app, use Coil or Glide to load the imageUrl
                 Text(
-                    "Image", 
+                    "Image",
                     modifier = Modifier.align(Alignment.Center),
                     color = Color.White
                 )
             }
-            
+
             Column(modifier = Modifier.padding(8.dp)) {
                 Text(
                     text = restaurant.name,
@@ -104,7 +143,7 @@ fun RestaurantCard(restaurant: Restaurant) {
                     color = Color.Gray,
                     maxLines = 1
                 )
-                
+
                 Row(
                     modifier = Modifier.padding(top = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
