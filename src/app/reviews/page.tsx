@@ -194,7 +194,7 @@ export default function Reviews() {
           </h3>
 
           {[5, 4, 3, 2, 1].map((r, i) => {
-            const percent = ((ratingCount[i] / reviews.length) * 100).toFixed(0);
+            const percent = ((ratingCount[i] / (reviews.length || 1)) * 100).toFixed(0);
             return (
               <div key={r} className="flex items-center mb-2 text-sm">
                 <span className="w-10">{r}⭐</span>
@@ -244,7 +244,7 @@ export default function Reviews() {
                 </div>
                 <p className="mt-2 text-sm leading-relaxed">{r.message}</p>
                 <p className="text-xs mt-2 text-gray-500">
-                  {new Date(r.createdAt).toLocaleString()}
+                  {r.createdAt ? new Date(r.createdAt).toLocaleString() : "Recently"}
                 </p>
               </motion.div>
             ))}
