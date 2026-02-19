@@ -1,17 +1,16 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import dbConnect from '@/lib/dbconection';
-import User from '@/models/restaurant';
+import dbConnect from "@/lib/dbconection";
+import User from "@/models/restaurant";
+import { NextResponse } from "next/server";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export async function POST(req: Request) {
   await dbConnect();
 
-  if (req.method === 'POST') {
-    try {
-      const user = await User.create(req.body);
-      res.status(201).json({ success: true, data: user });
-    } catch (error) {
-      res.status(400).json({ success: false });
-    }
+  try {
+    const body = await req.json();
+    const user = await User.create(body);
+    return NextResponse.json({ success: true, data: user }, { status: 201 });
+  } catch (error: any) {
+    console.error("Error creating user:", error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
   }
 }
-
