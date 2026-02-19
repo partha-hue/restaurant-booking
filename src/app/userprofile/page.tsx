@@ -1,4 +1,4 @@
-import ProfileClient from "../profile/ProfileClient";
+import ProfileClient from "./ProfileClient";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
