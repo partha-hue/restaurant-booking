@@ -40,20 +40,24 @@ export const authOptions: NextAuthOptions = {
       },
     }),
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      allowDangerousEmailAccountLinking: true,
     }),
     FacebookProvider({
-      clientId: process.env.FACEBOOK_CLIENT_ID!,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
+      clientId: process.env.FACEBOOK_CLIENT_ID || "",
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET || "",
+      allowDangerousEmailAccountLinking: true,
     }),
   ],
   pages: { signIn: "/login" },
   session: { strategy: "jwt" },
   callbacks: {
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user, account }) {
       if (user) {
-        token.user = user;
+        token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
       }
       if (account) {
         token.provider = account.provider;
@@ -62,11 +66,16 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (token.user) {
-        session.user = token.user as any;
+      if (token) {
+        session.user = {
+          ...session.user,
+          id: token.id as string,
+          name: token.name as string,
+          email: token.email as string,
+        };
+        session.provider = token.provider as string;
+        session.accessToken = token.accessToken as string;
       }
-      session.provider = token.provider as string;
-      session.accessToken = token.accessToken as string;
       return session;
     },
   },
@@ -85,7 +94,7 @@ export const authOptions: NextAuthOptions = {
             from: process.env.EMAIL_USER,
             to: user.email!,
             subject: "🎉 Welcome to FoodHub!",
-            text: `Hi ${user.name || user.email}, Welcome to FoodHub!`,
+            text: `Hi ${user.name || user.email}, Welcome to FoodHub! Your account has been successfully created.`,
           });
         }
       } catch (error) {
