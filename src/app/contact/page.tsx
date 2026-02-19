@@ -19,13 +19,13 @@ export default function ContactPage() {
                               <img src="/foodhub-logo.svg" alt="FoodHub Logo" className="w-16 h-16 mb-2 animate-bounce" />
                               <h1 className="text-4xl font-bold text-black mb-2 animate-fade-in">Contact FoodHub</h1>
                               <p className="text-md text-gray-700 text-center bg-yellow-50 rounded-lg px-4 py-2 animate-fade-in-delay">
-                                    Have questions, feedback, or need support? We're here to help! Reach out to us using the form below or call us directly.
+                                    Have questions, feedback, or need support? We are here to help! Reach out to us using the form below or call us directly.
                               </p>
                               <div className="mt-4 text-lg font-semibold text-black animate-fade-in-up">
                                     📞 Contact Number: <span className="text-primary">+91 8327692524</span>
                               </div>
                         </div>
-                        <form className="space-y-6 animate-fade-in-up" onSubmit={e => {e.preventDefault(); alert('Thank you for contacting us!')}}>
+                        <form className="space-y-6 animate-fade-in-up" onSubmit={e => { e.preventDefault(); alert('Thank you for contacting us!') }}>
                               <div>
                                     <label className="block text-black font-semibold mb-1">Name</label>
                                     <input type="text" className="input input-bordered w-full bg-white text-black" placeholder="Your Name" required />

@@ -10,10 +10,19 @@ const sendSMSConfirmation = async (phone: string, name: string, restaurantName: 
   return false; // Always false for demo
 };
 
+type Restaurant = {
+  _id: string;
+  name?: string;
+  image?: string;
+  details?: string;
+  location?: string;
+  rating?: number | string;
+};
+
 export default function BookRestaurantPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [restaurant, setRestaurant] = useState<any>(null);
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [date, setDate] = useState("");
@@ -27,7 +36,7 @@ export default function BookRestaurantPage({ params }: { params: { id: string } 
     fetch(`/api/restaurants`)
       .then(res => res.json())
       .then(data => {
-        setRestaurant(data.find((r: any) => r._id === params.id));
+        setRestaurant(data.find((r: Restaurant) => r._id === params.id) ?? null);
       });
   }, [params.id]);
 

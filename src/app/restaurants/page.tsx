@@ -1,10 +1,18 @@
 "use client";
 import React, { useState, useEffect } from "react";
+type Restaurant = {
+  _id: string;
+  name?: string;
+  image?: string;
+  details?: string;
+  location?: string;
+  rating?: number | string;
+};
 import Link from "next/link";
 
 export default function RestaurantListPage() {
   const [search, setSearch] = useState("");
-  const [restaurants, setRestaurants] = useState<any[]>([]);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -27,10 +35,9 @@ export default function RestaurantListPage() {
       });
   }, []);
 
-  const filtered = restaurants.filter(
-    (r: any) =>
-      r.name?.toLowerCase().includes(search.toLowerCase()) ||
-      r.location?.toLowerCase().includes(search.toLowerCase())
+  const filtered = restaurants.filter((r) =>
+    (r.name || "").toLowerCase().includes(search.toLowerCase()) ||
+    (r.location || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -113,7 +120,7 @@ export default function RestaurantListPage() {
             No restaurants found.
           </li>
         ) : (
-          filtered.map((r: any) => (
+          filtered.map((r) => (
             <li
               key={r._id}
               className="

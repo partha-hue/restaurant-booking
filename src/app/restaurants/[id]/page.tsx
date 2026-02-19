@@ -2,14 +2,23 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
+type Restaurant = {
+  _id: string;
+  name?: string;
+  image?: string;
+  details?: string;
+  location?: string;
+  rating?: number | string;
+};
+
 export default function RestaurantDetailsPage({ params }: { params: { id: string } }) {
-  const [restaurant, setRestaurant] = useState<any>(null);
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   useEffect(() => {
     fetch('/api/restaurants')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
-          setRestaurant(data.find((r: any) => r._id === params.id));
+          setRestaurant(data.find((r: Restaurant) => r._id === params.id) ?? null);
         } else {
           setRestaurant(null);
         }

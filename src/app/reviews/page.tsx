@@ -3,8 +3,10 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sun, Moon, ChevronDown, ChevronUp } from "lucide-react";
 
+type Review = { name: string; rating: number; message: string; createdAt?: string };
+
 export default function Reviews() {
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ name: "", rating: 5, message: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -66,11 +68,10 @@ export default function Reviews() {
 
   return (
     <section
-      className={`min-h-screen p-6 transition-all duration-500 ${
-        darkMode
+      className={`min-h-screen p-6 transition-all duration-500 ${darkMode
           ? "bg-gradient-to-br from-gray-900 to-gray-800 text-gray-100"
           : "bg-gradient-to-br from-yellow-50 to-purple-50 text-gray-900"
-      }`}
+        }`}
     >
       {/* Header with Theme Toggle */}
       <div className="flex justify-between items-center max-w-3xl mx-auto mb-8">
@@ -90,11 +91,10 @@ export default function Reviews() {
       <div className="max-w-xl mx-auto mb-10">
         <button
           onClick={() => setShowForm(!showForm)}
-          className={`w-full flex justify-between items-center p-4 rounded-xl font-semibold text-lg shadow-md transition-all ${
-            darkMode
+          className={`w-full flex justify-between items-center p-4 rounded-xl font-semibold text-lg shadow-md transition-all ${darkMode
               ? "bg-gray-800 hover:bg-gray-700 text-gray-100"
               : "bg-white hover:bg-gray-100 text-gray-800"
-          }`}
+            }`}
         >
           {showForm ? "Hide Review Form" : "Add Your Review"}
           {showForm ? <ChevronUp /> : <ChevronDown />}
@@ -107,9 +107,8 @@ export default function Reviews() {
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.4 }}
-              className={`overflow-hidden mt-4 p-6 rounded-2xl shadow-lg ${
-                darkMode ? "bg-gray-800/70" : "bg-white/90"
-              }`}
+              className={`overflow-hidden mt-4 p-6 rounded-2xl shadow-lg ${darkMode ? "bg-gray-800/70" : "bg-white/90"
+                }`}
             >
               <h2 className="text-2xl font-semibold text-center mb-6">
                 Share Your Experience 🌟
@@ -232,11 +231,10 @@ export default function Reviews() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className={`p-5 rounded-xl border transition-all ${
-                  darkMode
+                className={`p-5 rounded-xl border transition-all ${darkMode
                     ? "bg-gray-800/60 border-gray-700"
                     : "bg-white/80 border-gray-200"
-                } hover:shadow-lg`}
+                  } hover:shadow-lg`}
               >
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
                   <h4 className="font-bold text-lg">{r.name}</h4>

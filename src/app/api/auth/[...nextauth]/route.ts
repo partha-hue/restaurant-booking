@@ -6,7 +6,7 @@ import clientPromise from "@/lib/mongodb";
 import nodemailer from "nodemailer";
 
 export const authOptions: NextAuthOptions = {
-  adapter: MongoDBAdapter(clientPromise) as any,
+  adapter: MongoDBAdapter(clientPromise),
 
   providers: [
     GoogleProvider({
@@ -45,8 +45,8 @@ export const authOptions: NextAuthOptions = {
           name: token.name,
           email: token.email,
         };
-        (session as any).provider = token.provider;
-        (session as any).accessToken = token.accessToken;
+        session.provider = token.provider;
+        session.accessToken = token.accessToken;
       }
       return session;
     },

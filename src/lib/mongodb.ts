@@ -1,22 +1,27 @@
 import { MongoClient } from "mongodb";
 
-const uri = process.env.MONGODB_URI!;
+const uri = process.env.MONGODB_URI;
 const options = {};
 
-let client;
-let clientPromise: Promise<MongoClient>;
-
-if (!process.env.MONGODB_URI) {
+if (!uri) {
       throw new Error("Please add your MongoDB URI to .env");
 }
 
+let client: MongoClient | undefined;
+let clientPromise: Promise<MongoClient>;
+
+type GlobalWithMongo = typeof globalThis & {
+      _mongoClientPromise?: Promise<MongoClient>;
+};
+
 if (process.env.NODE_ENV === "development") {
       // In development, use a global variable so the value is preserved across module reloads
-      if (!(global as any)._mongoClientPromise) {
+      const g = globalThis as GlobalWithMongo;
+      if (!g._mongoClientPromise) {
             client = new MongoClient(uri, options);
-            (global as any)._mongoClientPromise = client.connect();
+            g._mongoClientPromise = client.connect();
       }
-      clientPromise = (global as any)._mongoClientPromise;
+      clientPromise = g._mongoClientPromise as Promise<MongoClient>;
 } else {
       // In production, create a new client for every connection
       client = new MongoClient(uri, options);

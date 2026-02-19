@@ -1,0 +1,6 @@
+# Ignore Android build files during Vercel web build
+app/
+gradle/
+.idea/
+*.apk
+*.aar
