@@ -1,19 +1,10 @@
-import Restaurant from '@/models/restaurant';
-import AddUserForm from '../restaurants/page';
-import UserList from '../bookings/page';
+export const dynamic = "force-dynamic";
 
-
-export default function Home() {
+export default function UserPage() {
   return (
-    <div>
-      <h1>User Management</h1>
-      <Restaurant />
-      <AddUserForm />
-      <UserList />
-      <AddUserForm />
-      <UserList />
-      
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-4">User Management</h1>
+      <p>Welcome to the user management section. Here you can view and manage your account details.</p>
     </div>
   );
 }
-
