@@ -1,6 +1,6 @@
 import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { signJwt } from "@/lib/jwt";
 import nodemailer from "nodemailer";
 import { ObjectId } from "mongodb";
