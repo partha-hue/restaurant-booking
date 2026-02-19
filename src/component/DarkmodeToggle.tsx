@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu"
 
@@ -25,7 +24,7 @@ export function ModeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-  // Dark mode removed
+        {/* Dark mode removed */}
       </DropdownMenuContent>
     </DropdownMenu>
   )
