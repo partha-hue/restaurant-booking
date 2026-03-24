@@ -2,7 +2,7 @@
 
 import { useState, useEffect, FormEvent } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import AdminLayout from '../../../components/AdminLayout';
+import AdminLayout from '@/app/admin/components/AdminLayout';
 import toast from 'react-hot-toast';
 import { CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
