@@ -21,10 +21,26 @@ export default function SignupPage() {
         body: JSON.stringify(form),
       });
       const data = await res.json();
+      if (!res.ok) {
+        setLoading(false);
+        return setMessage({ type: "error", text: data.error || "Signup failed." });
+      }
+
+      // automatically sign in after sign-up with NextAuth credentials provider
+      const signinResult = await signIn("credentials", {
+        redirect: false,
+        email: form.email,
+        password: form.password,
+      });
+
+      if (signinResult?.error) {
+        setLoading(false);
+        return setMessage({ type: "error", text: signinResult.error || "Signup successful but login failed." });
+      }
+
       setLoading(false);
-      if (!res.ok) return setMessage({ type: "error", text: data.error || "Signup failed." });
-      setMessage({ type: "success", text: "Signup successful! Check your email." });
-      router.push("/dashboard");
+      setMessage({ type: "success", text: "Signup successful! Redirecting to dashboard..." });
+      router.replace("/dashboard");
     } catch (err) {
       setLoading(false);
       setMessage({ type: "error", text: "Something went wrong. Try again." });
@@ -67,11 +83,10 @@ export default function SignupPage() {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full py-2 rounded text-white font-semibold transition ${
-            loading
+          className={`w-full py-2 rounded text-white font-semibold transition ${loading
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
-          }`}
+            }`}
         >
           {loading ? "Signing up..." : "Sign Up"}
         </button>
@@ -98,9 +113,8 @@ export default function SignupPage() {
 
         {message && (
           <p
-            className={`mt-4 text-sm text-center ${
-              message.type === "success" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
-            }`}
+            className={`mt-4 text-sm text-center ${message.type === "success" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+              }`}
           >
             {message.text}
           </p>
