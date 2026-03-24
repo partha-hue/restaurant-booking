@@ -11,6 +11,8 @@ interface Booking {
   name: string;
   date: string;
   phone: string;
+  guests: number;
+  payment: string;
   createdAt: string;
 }
 

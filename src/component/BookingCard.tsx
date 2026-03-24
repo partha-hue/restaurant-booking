@@ -1,4 +1,4 @@
-import { FaCalendarAlt, FaUser, FaPhone } from "react-icons/fa";
+import { FaCalendarAlt, FaUser, FaPhone, FaUsers } from "react-icons/fa";
 
 interface BookingCardProps {
   booking: {
@@ -7,6 +7,8 @@ interface BookingCardProps {
     name: string;
     date: string;
     phone: string;
+    guests: number;
+    payment: string;
     createdAt: string;
   };
   selected: boolean;
@@ -14,14 +16,21 @@ interface BookingCardProps {
 }
 
 export default function BookingCard({ booking, selected, onSelect }: BookingCardProps) {
+  const paymentLabels = {
+    offline: 'Pay at Restaurant',
+    gpay: 'Google Pay',
+    phonepe: 'PhonePe',
+    paytm: 'Paytm',
+    bank: 'Bank Transfer',
+  };
+
   return (
     <div
       onClick={onSelect}
-      className={`cursor-pointer p-4 rounded-2xl border transition-all duration-300 shadow-sm hover:shadow-md ${
-        selected
+      className={`cursor-pointer p-4 rounded-2xl border transition-all duration-300 shadow-sm hover:shadow-md ${selected
           ? "bg-red-100 dark:bg-red-900 border-red-400"
           : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-      }`}
+        }`}
     >
       <h2 className="text-lg font-semibold mb-2">{booking.restaurantName}</h2>
       <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
@@ -31,7 +40,13 @@ export default function BookingCard({ booking, selected, onSelect }: BookingCard
         <FaPhone /> <span>{booking.phone}</span>
       </div>
       <div className="flex items-center gap-2 text-sm mt-1 text-gray-600 dark:text-gray-400">
-        <FaCalendarAlt /> <span>{booking.date}</span>
+        <FaUsers /> <span>{booking.guests} guests</span>
+      </div>
+      <div className="flex items-center gap-2 text-sm mt-1 text-gray-600 dark:text-gray-400">
+        <FaCalendarAlt /> <span>{new Date(booking.date).toLocaleDateString()}</span>
+      </div>
+      <div className="mt-2 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
+        {paymentLabels[booking.payment as keyof typeof paymentLabels] || booking.payment}
       </div>
       <p className="text-xs mt-2 text-gray-400">
         Booked on {new Date(booking.createdAt).toLocaleDateString()}
