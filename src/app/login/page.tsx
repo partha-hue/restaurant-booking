@@ -10,7 +10,7 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (status === "authenticated") router.replace("/dashboard");
+    if (status === "authenticated") router.replace("/");
   }, [status, router]);
 
   if (status === "loading") return <p className="p-4 text-center">Loading...</p>;

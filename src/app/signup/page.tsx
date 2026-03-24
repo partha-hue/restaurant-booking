@@ -39,8 +39,8 @@ export default function SignupPage() {
       }
 
       setLoading(false);
-      setMessage({ type: "success", text: "Signup successful! Redirecting to dashboard..." });
-      router.replace("/dashboard");
+      setMessage({ type: "success", text: "Signup successful! Redirecting home..." });
+      router.replace("/");
     } catch (err) {
       setLoading(false);
       setMessage({ type: "error", text: "Something went wrong. Try again." });
@@ -84,8 +84,8 @@ export default function SignupPage() {
           type="submit"
           disabled={loading}
           className={`w-full py-2 rounded text-white font-semibold transition ${loading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
             }`}
         >
           {loading ? "Signing up..." : "Sign Up"}
@@ -100,7 +100,7 @@ export default function SignupPage() {
         {/* Google Sign-up / Login */}
         <button
           type="button"
-          onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+          onClick={() => signIn("google", { callbackUrl: "/" })}
           className="flex items-center justify-center w-full border py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300"
         >
           <img
