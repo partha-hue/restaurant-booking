@@ -4,7 +4,11 @@ const uri = process.env.MONGODB_URI;
 const options = {};
 
 if (!uri) {
-      throw new Error("Please add your MongoDB URI to .env");
+      throw new Error("Please add your MongoDB URI to .env (MONGODB_URI)");
+}
+
+if (uri.includes("<db_password>") || uri.includes("YOUR_DB_PASSWORD")) {
+      throw new Error("MONGODB_URI contains placeholder password; replace <db_password> with your real password");
 }
 
 let client: MongoClient | undefined;
