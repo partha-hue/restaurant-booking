@@ -17,11 +17,6 @@ import {
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 
-const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "admin@foodhub.com")
-      .split(",")
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
-
 interface User {
       _id: string;
       name: string;
@@ -38,7 +33,6 @@ interface User {
 export default function AdminUsers() {
       const router = useRouter();
       const { data: session, status } = useSession();
-      const [isAdmin, setIsAdmin] = useState(false);
       const [users, setUsers] = useState<User[]>([]);
       const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
       const [loading, setLoading] = useState(true);
@@ -47,20 +41,16 @@ export default function AdminUsers() {
       const [actionLoading, setActionLoading] = useState<string | null>(null);
 
       useEffect(() => {
-            if (status === "authenticated") {
-                  const email = session?.user?.email?.toLowerCase() || "";
-                  setIsAdmin(ADMIN_EMAILS.includes(email));
-            }
             if (status === "unauthenticated") {
                   router.replace("/login");
             }
-      }, [status, session, router]);
+      }, [status, router]);
 
       useEffect(() => {
-            if (isAdmin) {
+            if (status === "authenticated") {
                   fetchUsers();
             }
-      }, [isAdmin]);
+      }, [status]);
 
       useEffect(() => {
             let filtered = users;
@@ -176,7 +166,7 @@ export default function AdminUsers() {
             );
       }
 
-      if (!session || !isAdmin) {
+      if (!session) {
             return (
                   <div className="min-h-screen flex items-center justify-center">
                         <div className="p-6 bg-white rounded-xl shadow">

@@ -1,33 +1,14 @@
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/authOptions";
+import { getAdminErrorStatus, requireAdminSession } from "@/lib/adminAuth";
 
 const DATABASE_NAME = process.env.MONGODB_DB || "foodhub";
-
-function isAdmin(email?: string | null) {
-  const list = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "admin@foodhub.com")
-    .split(",")
-    .map((item) => item.trim().toLowerCase())
-    .filter(Boolean);
-  return !!email && list.includes(email.toLowerCase());
-}
-
-async function requireAdmin() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.email || !isAdmin(session.user.email)) {
-    const err = new Error("Unauthorized");
-    // @ts-ignore
-    err.name = "Unauthorized";
-    throw err;
-  }
-}
 
 export async function GET() {
   try {
     const client = await clientPromise;
     const db = client.db(DATABASE_NAME);
-    const offers = await db.collection("offers").find({}).toArray();
+    const offers = await db.collection("offers").find({}).sort({ createdAt: -1 }).toArray();
 
     return NextResponse.json(offers);
   } catch (err) {
@@ -37,33 +18,69 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    await requireAdmin();
+    await requireAdminSession();
 
     const body = await req.json();
-    const { restaurantId, restaurantName, offerTitle, offerDescription, offerImage, validUntil } = body;
+    const {
+      title,
+      description,
+      discountType,
+      discountValue,
+      minimumOrder,
+      maximumDiscount,
+      startDate,
+      endDate,
+      applicableTo,
+      restaurantIds,
+      usageLimit,
+      usagePerUser,
+      isActive
+    } = body;
 
-    if (!restaurantId || !restaurantName || !offerTitle || !offerDescription || !offerImage || !validUntil) {
-      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+    // Validation
+    if (!title || !description || !discountType || !discountValue || !startDate || !endDate) {
+      return NextResponse.json({ error: "Required fields are missing" }, { status: 400 });
+    }
+
+    if (discountType === 'percentage' && (discountValue < 0 || discountValue > 100)) {
+      return NextResponse.json({ error: "Percentage discount must be between 0 and 100" }, { status: 400 });
+    }
+
+    if (discountType === 'fixed' && discountValue < 0) {
+      return NextResponse.json({ error: "Fixed discount must be positive" }, { status: 400 });
     }
 
     const client = await clientPromise;
     const db = client.db(DATABASE_NAME);
+
     const newOffer = {
-      restaurantId,
-      restaurantName,
-      offerTitle,
-      offerDescription,
-      offerImage,
-      validUntil,
+      title,
+      description,
+      discountType,
+      discountValue: Number(discountValue),
+      minimumOrder: Number(minimumOrder) || 0,
+      maximumDiscount: Number(maximumDiscount) || 0,
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
+      applicableTo: applicableTo || 'all',
+      restaurantIds: restaurantIds || [],
+      usageLimit: Number(usageLimit) || 0,
+      usagePerUser: Number(usagePerUser) || 1,
+      usageCount: 0,
+      isActive: isActive !== false,
       createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
-    await db.collection("offers").insertOne(newOffer);
+    const result = await db.collection("offers").insertOne(newOffer);
 
-    return NextResponse.json({ message: "Offer added successfully", offer: newOffer });
+    return NextResponse.json({
+      message: "Offer created successfully",
+      offer: { ...newOffer, _id: result.insertedId }
+    });
   } catch (err: any) {
-    const status = err?.name === "Unauthorized" ? 403 : 500;
-    return NextResponse.json({ error: err?.message || "Failed to add offer" }, { status });
+    const status = getAdminErrorStatus(err);
+    return NextResponse.json({ error: err?.message || "Failed to create offer" }, { status });
   }
 }
 

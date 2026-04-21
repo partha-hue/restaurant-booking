@@ -1,37 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import clientPromise from "@/lib/mongodb";
 import { getAdminErrorStatus, requireAdminSession } from "@/lib/adminAuth";
 
 const DATABASE_NAME = process.env.MONGODB_DB || "foodhub";
 
-export async function GET() {
+export async function PATCH(
+        request: NextRequest,
+        { params }: { params: { id: string } }
+) {
         try {
                 await requireAdminSession();
-                const client = await clientPromise;
-                const db = client.db(DATABASE_NAME);
-
-                const users = await db
-                        .collection("users")
-                        .find({})
-                        .sort({ createdAt: -1 })
-                        .toArray();
-
-                return NextResponse.json(users);
-        } catch (err: any) {
-                const status = getAdminErrorStatus(err);
-                return NextResponse.json({ error: err?.message || "Failed to fetch users" }, { status });
-        }
-}
-
-export async function PATCH(request: Request) {
-        try {
-                await requireAdminSession();
-                const { userId, action } = await request.json();
-
-                if (!userId || !action) {
-                        return NextResponse.json({ error: "User ID and action are required" }, { status: 400 });
-                }
+                const { action } = await request.json();
+                const userId = params.id;
 
                 if (!ObjectId.isValid(userId)) {
                         return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
@@ -48,11 +29,9 @@ export async function PATCH(request: Request) {
 
                 const client = await clientPromise;
                 const db = client.db(DATABASE_NAME);
-
-                const result = await db.collection("users").updateOne(
-                        { _id: new ObjectId(userId) },
-                        { $set: updateData }
-                );
+                const result = await db
+                        .collection("users")
+                        .updateOne({ _id: new ObjectId(userId) }, { $set: updateData });
 
                 if (result.matchedCount === 0) {
                         return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -65,14 +44,13 @@ export async function PATCH(request: Request) {
         }
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE(
+        _request: NextRequest,
+        { params }: { params: { id: string } }
+) {
         try {
                 await requireAdminSession();
-                const { userId } = await request.json();
-
-                if (!userId) {
-                        return NextResponse.json({ error: "User ID is required" }, { status: 400 });
-                }
+                const userId = params.id;
 
                 if (!ObjectId.isValid(userId)) {
                         return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
@@ -80,7 +58,6 @@ export async function DELETE(request: Request) {
 
                 const client = await clientPromise;
                 const db = client.db(DATABASE_NAME);
-
                 const result = await db.collection("users").deleteOne({ _id: new ObjectId(userId) });
 
                 if (result.deletedCount === 0) {

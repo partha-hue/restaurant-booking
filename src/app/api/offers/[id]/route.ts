@@ -1,28 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/authOptions";
 import { ObjectId } from "mongodb";
+import { getAdminErrorStatus, requireAdminSession } from "@/lib/adminAuth";
 
 const DATABASE_NAME = process.env.MONGODB_DB || "foodhub";
-
-function isAdmin(email?: string | null) {
-      const list = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "admin@foodhub.com")
-            .split(",")
-            .map((item) => item.trim().toLowerCase())
-            .filter(Boolean);
-      return !!email && list.includes(email.toLowerCase());
-}
-
-async function requireAdmin() {
-      const session = await getServerSession(authOptions);
-      if (!session?.user?.email || !isAdmin(session.user.email)) {
-            const err = new Error("Unauthorized");
-            // @ts-ignore
-            err.name = "Unauthorized";
-            throw err;
-      }
-}
 
 export async function GET(
       req: NextRequest,
@@ -51,7 +32,7 @@ export async function PUT(
       { params }: { params: { id: string } }
 ) {
       try {
-            await requireAdmin();
+            await requireAdminSession();
 
             const body = await req.json();
             const {
@@ -117,7 +98,7 @@ export async function PUT(
                   offer: { ...updateData, _id: params.id }
             });
       } catch (err: any) {
-            const status = err?.name === "Unauthorized" ? 403 : 500;
+            const status = getAdminErrorStatus(err);
             return NextResponse.json({ error: err?.message || "Failed to update offer" }, { status });
       }
 }
@@ -127,7 +108,7 @@ export async function DELETE(
       { params }: { params: { id: string } }
 ) {
       try {
-            await requireAdmin();
+            await requireAdminSession();
 
             const client = await clientPromise;
             const db = client.db(DATABASE_NAME);
@@ -142,7 +123,7 @@ export async function DELETE(
 
             return NextResponse.json({ message: "Offer deleted successfully" });
       } catch (err: any) {
-            const status = err?.name === "Unauthorized" ? 403 : 500;
+            const status = getAdminErrorStatus(err);
             return NextResponse.json({ error: err?.message || "Failed to delete offer" }, { status });
       }
 }

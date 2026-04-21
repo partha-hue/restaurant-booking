@@ -6,15 +6,9 @@ import AdminLayout from "../../components/AdminLayout";
 import { ArrowLeft, Save, Upload } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 
-const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "admin@foodhub.com")
-      .split(",")
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
-
 export default function NewRestaurant() {
       const router = useRouter();
       const { data: session, status } = useSession();
-      const [isAdmin, setIsAdmin] = useState(false);
       const [loading, setLoading] = useState(false);
       const [formData, setFormData] = useState({
             name: "",
@@ -30,14 +24,10 @@ export default function NewRestaurant() {
       });
 
       React.useEffect(() => {
-            if (status === "authenticated") {
-                  const email = session?.user?.email?.toLowerCase() || "";
-                  setIsAdmin(ADMIN_EMAILS.includes(email));
-            }
             if (status === "unauthenticated") {
                   router.replace("/login");
             }
-      }, [status, session, router]);
+      }, [status, router]);
 
       const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
             setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -92,7 +82,7 @@ export default function NewRestaurant() {
             );
       }
 
-      if (!session || !isAdmin) {
+      if (!session) {
             return (
                   <div className="min-h-screen flex items-center justify-center">
                         <div className="p-6 bg-white rounded-xl shadow">

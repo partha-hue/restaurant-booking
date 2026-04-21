@@ -15,11 +15,6 @@ import {
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 
-const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "admin@foodhub.com")
-      .split(",")
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
-
 interface Restaurant {
       _id: string;
       name: string;
@@ -33,7 +28,6 @@ interface Restaurant {
 export default function AdminRestaurants() {
       const router = useRouter();
       const { data: session, status } = useSession();
-      const [isAdmin, setIsAdmin] = useState(false);
       const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
       const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>([]);
       const [loading, setLoading] = useState(true);
@@ -41,20 +35,16 @@ export default function AdminRestaurants() {
       const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
 
       useEffect(() => {
-            if (status === "authenticated") {
-                  const email = session?.user?.email?.toLowerCase() || "";
-                  setIsAdmin(ADMIN_EMAILS.includes(email));
-            }
             if (status === "unauthenticated") {
                   router.replace("/login");
             }
-      }, [status, session, router]);
+      }, [status, router]);
 
       useEffect(() => {
-            if (isAdmin) {
+            if (status === "authenticated") {
                   fetchRestaurants();
             }
-      }, [isAdmin]);
+      }, [status]);
 
       useEffect(() => {
             const filtered = restaurants.filter(restaurant =>
@@ -109,7 +99,7 @@ export default function AdminRestaurants() {
             );
       }
 
-      if (!session || !isAdmin) {
+      if (!session) {
             return (
                   <div className="min-h-screen flex items-center justify-center">
                         <div className="p-6 bg-white rounded-xl shadow">

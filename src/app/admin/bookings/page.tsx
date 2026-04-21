@@ -16,11 +16,6 @@ import {
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 
-const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "admin@foodhub.com")
-      .split(",")
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
-
 interface Booking {
       _id: string;
       restaurantId: string;
@@ -36,7 +31,6 @@ interface Booking {
 export default function AdminBookings() {
       const router = useRouter();
       const { data: session, status } = useSession();
-      const [isAdmin, setIsAdmin] = useState(false);
       const [bookings, setBookings] = useState<Booking[]>([]);
       const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
       const [loading, setLoading] = useState(true);
@@ -45,20 +39,16 @@ export default function AdminBookings() {
       const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
 
       useEffect(() => {
-            if (status === "authenticated") {
-                  const email = session?.user?.email?.toLowerCase() || "";
-                  setIsAdmin(ADMIN_EMAILS.includes(email));
-            }
             if (status === "unauthenticated") {
                   router.replace("/login");
             }
-      }, [status, session, router]);
+      }, [status, router]);
 
       useEffect(() => {
-            if (isAdmin) {
+            if (status === "authenticated") {
                   fetchBookings();
             }
-      }, [isAdmin]);
+      }, [status]);
 
       useEffect(() => {
             let filtered = bookings;
@@ -89,7 +79,7 @@ export default function AdminBookings() {
 
       const fetchBookings = async () => {
             try {
-                  const res = await fetch("/api/bookings");
+                  const res = await fetch("/api/admin/bookings", { cache: "no-store" });
                   if (!res.ok) throw new Error("Failed to fetch bookings");
                   const data = await res.json();
                   setBookings(data);
@@ -106,7 +96,7 @@ export default function AdminBookings() {
 
             setDeleteLoading(ids[0]);
             try {
-                  const res = await fetch("/api/bookings", {
+                  const res = await fetch("/api/admin/bookings", {
                         method: "DELETE",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ ids }),
@@ -169,7 +159,7 @@ export default function AdminBookings() {
             );
       }
 
-      if (!session || !isAdmin) {
+      if (!session) {
             return (
                   <div className="min-h-screen flex items-center justify-center">
                         <div className="p-6 bg-white rounded-xl shadow">
