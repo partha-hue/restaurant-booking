@@ -21,9 +21,8 @@ export default function HomePage() {
     <section className="relative min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 text-white">
       {/* Navbar */}
       <nav
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          isScrolled ? "bg-white dark:bg-gray-900 shadow-md" : "bg-transparent"
-        }`}
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? "bg-white dark:bg-gray-900 shadow-md" : "bg-transparent"
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
           {/* Logo */}
@@ -68,14 +67,12 @@ export default function HomePage() {
               className="relative w-10 h-10 rounded-full border border-white/30 flex items-center justify-center transition-all hover:bg-white/20"
             >
               <Sun
-                className={`absolute h-5 w-5 transition-all ${
-                  theme === "dark" ? "scale-0 rotate-90" : "scale-100 rotate-0"
-                }`}
+                className={`absolute h-5 w-5 transition-all ${theme === "dark" ? "scale-0 rotate-90" : "scale-100 rotate-0"
+                  }`}
               />
               <Moon
-                className={`absolute h-5 w-5 transition-all ${
-                  theme === "dark" ? "scale-100 rotate-0" : "scale-0 rotate-90"
-                }`}
+                className={`absolute h-5 w-5 transition-all ${theme === "dark" ? "scale-100 rotate-0" : "scale-0 rotate-90"
+                  }`}
               />
             </button>
 
@@ -105,15 +102,13 @@ export default function HomePage() {
 
       {/* Mobile Sidebar */}
       <div
-        className={`fixed top-0 left-0 w-full h-full bg-black/50 z-40 transition-opacity duration-300 ${
-          sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed top-0 left-0 w-full h-full bg-black/50 z-40 transition-opacity duration-300 ${sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
         onClick={() => setSidebarOpen(false)}
       />
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-900 z-50 transform transition-transform duration-300 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-900 z-50 transform transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
           <span className="text-xl font-bold text-primary dark:text-yellow-400">FoodHub</span>
@@ -158,8 +153,8 @@ export default function HomePage() {
           <Link href="/restaurants" className="btn btn-primary btn-lg px-8 py-3">
             Explore Restaurants
           </Link>
-          <Link href="/admin" className="btn btn-outline btn-lg px-8 py-3">
-            Signup as Admin
+          <Link href="/admin/request-access" className="btn btn-outline btn-lg px-8 py-3">
+            Request Admin Access
           </Link>
         </div>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 
@@ -9,6 +9,13 @@ export default function SignupPage() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
+  const [nextPath, setNextPath] = useState("/");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const next = params.get("next");
+    setNextPath(next && next.startsWith("/") ? next : "/");
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +38,7 @@ export default function SignupPage() {
         redirect: false,
         email: form.email,
         password: form.password,
+        callbackUrl: nextPath,
       });
 
       if (signinResult?.error) {
@@ -39,8 +47,8 @@ export default function SignupPage() {
       }
 
       setLoading(false);
-      setMessage({ type: "success", text: "Signup successful! Redirecting home..." });
-      router.replace("/");
+      setMessage({ type: "success", text: "Signup successful! Redirecting..." });
+      router.replace(nextPath);
     } catch (err) {
       setLoading(false);
       setMessage({ type: "error", text: "Something went wrong. Try again." });
@@ -100,7 +108,7 @@ export default function SignupPage() {
         {/* Google Sign-up / Login */}
         <button
           type="button"
-          onClick={() => signIn("google", { callbackUrl: "/" })}
+          onClick={() => signIn("google", { callbackUrl: nextPath })}
           className="flex items-center justify-center w-full border py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300"
         >
           <img
@@ -110,6 +118,10 @@ export default function SignupPage() {
           />
           Continue with Google
         </button>
+
+        <p className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400">
+          Admin access is reviewed separately. To request it, use the admin access request page after sign up.
+        </p>
 
         {message && (
           <p
