@@ -12,7 +12,9 @@ function getAdminEmails() {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isAdminPath = pathname.startsWith('/admin') || pathname.startsWith('/api/admin');
+  const isPublicAdminRequestPage = pathname === '/admin/request-access';
+  const isPublicAdminRequestApi = pathname === '/api/admin/requests';
+  const isAdminPath = (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) && !isPublicAdminRequestPage && !isPublicAdminRequestApi;
 
   if (!isAdminPath) {
     return NextResponse.next();
