@@ -10,6 +10,7 @@ import {
       Tag,
       BarChart3,
       Settings,
+      ShieldCheck,
       LogOut,
       Menu,
       X
@@ -27,6 +28,7 @@ const navigation = [
       { name: 'Offers', href: '/admin/offers', icon: Tag },
       { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
       { name: 'Settings', href: '/admin/settings', icon: Settings },
+      { name: 'Requests', href: '/admin/requests', icon: ShieldCheck },
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {

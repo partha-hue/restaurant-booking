@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ObjectId } from "mongodb";
 import clientPromise from "@/lib/mongodb";
+import { getAdminErrorStatus, requireAdminSession } from "@/lib/adminAuth";
 import nodemailer from "nodemailer";
 
 const DATABASE_NAME = process.env.MONGODB_DB || "foodhub";
@@ -10,6 +12,19 @@ function getAdminEmails() {
                 .split(",")
                 .map((item) => item.trim())
                 .filter(Boolean);
+}
+
+export async function GET() {
+        try {
+                await requireAdminSession();
+                const client = await clientPromise;
+                const db = client.db(DATABASE_NAME);
+
+                const requests = await db.collection("admin_requests").find({}).sort({ createdAt: -1 }).toArray();
+                return NextResponse.json(requests);
+        } catch (error) {
+                return NextResponse.json({ error: "Failed to fetch admin requests" }, { status: getAdminErrorStatus(error) });
+        }
 }
 
 export async function POST(request: NextRequest) {
@@ -69,5 +84,67 @@ export async function POST(request: NextRequest) {
         } catch (error) {
                 console.error("Admin request error:", error);
                 return NextResponse.json({ error: "Failed to submit admin access request" }, { status: 500 });
+        }
+}
+
+export async function PATCH(request: NextRequest) {
+        try {
+                const session = await requireAdminSession();
+                const { requestId, action } = await request.json();
+
+                if (!requestId || !action) {
+                        return NextResponse.json({ error: "Request ID and action are required" }, { status: 400 });
+                }
+
+                if (action !== "approve" && action !== "reject") {
+                        return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+                }
+
+                if (!ObjectId.isValid(requestId)) {
+                        return NextResponse.json({ error: "Invalid request ID" }, { status: 400 });
+                }
+
+                const client = await clientPromise;
+                const db = client.db(DATABASE_NAME);
+                const requestObjectId = new ObjectId(requestId);
+                const adminRequest = await db.collection("admin_requests").findOne({ _id: requestObjectId });
+
+                if (!adminRequest) {
+                        return NextResponse.json({ error: "Request not found" }, { status: 404 });
+                }
+
+                const nextStatus = action === "approve" ? "approved" : "rejected";
+                await db.collection("admin_requests").updateOne(
+                        { _id: requestObjectId },
+                        {
+                                $set: {
+                                        status: nextStatus,
+                                        reviewedAt: new Date(),
+                                        reviewedBy: session.user?.email || null,
+                                },
+                        }
+                );
+
+                if (action === "approve") {
+                        await db.collection("admin_access").updateOne(
+                                { email: adminRequest.email },
+                                {
+                                        $set: {
+                                                name: adminRequest.name,
+                                                email: adminRequest.email,
+                                                company: adminRequest.company || "",
+                                                status: "approved",
+                                                approvedAt: new Date(),
+                                                approvedBy: session.user?.email || null,
+                                        },
+                                },
+                                { upsert: true }
+                        );
+                }
+
+                return NextResponse.json({ success: true, status: nextStatus });
+        } catch (error) {
+                console.error("Admin request review error:", error);
+                return NextResponse.json({ error: "Failed to update admin request" }, { status: getAdminErrorStatus(error) });
         }
 }

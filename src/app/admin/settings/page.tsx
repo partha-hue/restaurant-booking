@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import AdminLayout from "../components/AdminLayout";
 
 export default function AdminSettingsPage() {
@@ -13,8 +14,8 @@ export default function AdminSettingsPage() {
 
                                 <div className="mt-8 bg-white shadow rounded-lg p-6 space-y-4">
                                         <div>
-                                                <h2 className="text-base font-semibold text-gray-900">Admin Access Emails</h2>
-                                                <p className="text-sm text-gray-500">Configured from environment variables during deployment.</p>
+                                                <h2 className="text-base font-semibold text-gray-900">Admin Access Model</h2>
+                                                <p className="text-sm text-gray-500">Seed admins come from environment variables. Approved requests are stored in the database and picked up automatically at login.</p>
                                                 <div className="mt-3 flex flex-wrap gap-2">
                                                         {adminEmails.length > 0 ? (
                                                                 adminEmails.map((email) => (
@@ -36,6 +37,12 @@ export default function AdminSettingsPage() {
                                                         <li>Use production MongoDB URI and enforce database backups.</li>
                                                         <li>Configure Twilio and email credentials only if required.</li>
                                                 </ul>
+                                        </div>
+
+                                        <div className="border-t pt-4">
+                                                <Link href="/admin/requests" className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+                                                        Review Admin Requests
+                                                </Link>
                                         </div>
                                 </div>
                         </div>

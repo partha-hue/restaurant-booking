@@ -9,6 +9,31 @@ import { NextAuthOptions } from "next-auth";
 import dbConnect from "./dbconection";
 import nodemailer from "nodemailer";
 
+const ADMIN_DATABASE_NAME = process.env.MONGODB_DB || "foodhub";
+
+async function hasAdminAccess(email?: string | null): Promise<boolean> {
+  if (!email) return false;
+
+  const normalizedEmail = email.trim().toLowerCase();
+  const envEmails = (process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
+    .split(",")
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (envEmails.includes(normalizedEmail)) {
+    return true;
+  }
+
+  const client = await clientPromise;
+  const db = client.db(ADMIN_DATABASE_NAME);
+  const approvedAdmin = await db.collection("admin_access").findOne({
+    email: normalizedEmail,
+    status: "approved",
+  });
+
+  return !!approvedAdmin;
+}
+
 export const authOptions: NextAuthOptions = {
   // @ts-ignore
   adapter: MongoDBAdapter(clientPromise) as any,
@@ -58,6 +83,9 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
+        token.isAdmin = await hasAdminAccess(user.email);
+      } else if (token.email) {
+        token.isAdmin = await hasAdminAccess(token.email);
       }
       if (account) {
         token.provider = account.provider;
@@ -72,6 +100,7 @@ export const authOptions: NextAuthOptions = {
           id: token.id as string,
           name: token.name as string,
           email: token.email as string,
+          isAdmin: token.isAdmin as boolean,
         };
         session.provider = token.provider as string;
         session.accessToken = token.accessToken as string;

@@ -8,6 +8,7 @@ import {
       Building2,
       Calendar,
       Tag,
+      ShieldCheck,
       TrendingUp,
       DollarSign,
       Activity,
@@ -257,6 +258,14 @@ export default function AdminDashboard() {
                                           <Tag className="h-8 w-8 text-yellow-600 mb-2" />
                                           <h3 className="text-sm font-medium text-gray-900">Create Offer</h3>
                                           <p className="text-sm text-gray-500">Add a new promotional offer</p>
+                                    </button>
+                                    <button
+                                          onClick={() => router.push('/admin/requests')}
+                                          className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
+                                    >
+                                          <ShieldCheck className="h-8 w-8 text-emerald-600 mb-2" />
+                                          <h3 className="text-sm font-medium text-gray-900">Review Requests</h3>
+                                          <p className="text-sm text-gray-500">Approve or reject admin access requests</p>
                                     </button>
                                     <button
                                           onClick={() => router.push('/admin/analytics')}

@@ -22,7 +22,7 @@ export async function middleware(request: NextRequest) {
 
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
   const email = (token?.email || '').toLowerCase();
-  const isAdmin = getAdminEmails().includes(email);
+  const isAdmin = Boolean(token?.isAdmin) || getAdminEmails().includes(email);
 
   if (!token || !isAdmin) {
     if (pathname.startsWith('/api/admin')) {
