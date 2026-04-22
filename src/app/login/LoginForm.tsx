@@ -6,12 +6,19 @@ import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
+  const [nextPath, setNextPath] = useState("/dashboard");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const next = params.get("next");
+    setNextPath(next && next.startsWith("/") ? next : "/dashboard");
+  }, []);
 
   // Redirect if already logged in
   useEffect(() => {
-    if (status === "authenticated") router.replace("/dashboard");
-  }, [status, router]);
+    if (status === "authenticated") router.replace(nextPath);
+  }, [status, router, nextPath]);
 
   // ---------- States ----------
   const [form, setForm] = useState({ email: "", password: "" });
@@ -54,13 +61,13 @@ export default function LoginForm() {
         redirect: false,
         email: form.email,
         password: form.password,
-        callbackUrl: "/",
+        callbackUrl: nextPath,
       });
 
       setLoading(false);
 
       if (res?.error) setError(res.error);
-      else router.replace("/");
+      else router.replace(nextPath);
     } catch {
       setError("Login failed. Please try again.");
       setLoading(false);
@@ -93,7 +100,7 @@ export default function LoginForm() {
       setLoading(false);
 
       if (!res.ok) setError(data.error || "Invalid OTP");
-      else router.replace("/");
+      else router.replace(nextPath);
     }
   };
 
@@ -139,7 +146,7 @@ export default function LoginForm() {
           <div className="flex-1 h-px bg-gray-300 dark:bg-gray-700"></div>
         </div>
 
-        <button onClick={() => signIn("google", { callbackUrl: "/" })} className="flex items-center justify-center w-full border border-gray-300 dark:border-gray-600 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+        <button onClick={() => signIn("google", { callbackUrl: nextPath })} className="flex items-center justify-center w-full border border-gray-300 dark:border-gray-600 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition">
           <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" className="w-5 h-5 mr-2" /> Continue with Google
         </button>
 
