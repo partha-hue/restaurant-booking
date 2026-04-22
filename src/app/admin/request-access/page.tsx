@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 export default function AdminRequestAccessPage() {
         const router = useRouter();
-        const [form, setForm] = useState({ name: "", email: "", company: "", reason: "" });
+        const [form, setForm] = useState({ name: "", email: "", password: "", company: "", reason: "" });
         const [loading, setLoading] = useState(false);
         const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
 
@@ -28,7 +28,7 @@ export default function AdminRequestAccessPage() {
                         }
 
                         setMessage({ type: "success", text: "Request submitted. Admin will review your access." });
-                        setForm({ name: "", email: "", company: "", reason: "" });
+                        setForm({ name: "", email: "", password: "", company: "", reason: "" });
                         setTimeout(() => router.push("/login?next=%2Fadmin"), 1200);
                 } catch (error: any) {
                         setMessage({ type: "error", text: error.message || "Something went wrong" });
@@ -68,6 +68,16 @@ export default function AdminRequestAccessPage() {
                                                 onChange={handleChange}
                                                 required
                                                 placeholder="Work email"
+                                                className="w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                        />
+                                        <input
+                                                name="password"
+                                                type="password"
+                                                value={form.password}
+                                                onChange={handleChange}
+                                                required
+                                                minLength={6}
+                                                placeholder="Account password (min 6 chars)"
                                                 className="w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                         />
                                         <input

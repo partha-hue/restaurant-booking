@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 import clientPromise from "@/lib/mongodb";
 import { getAdminErrorStatus, requireAdminSession } from "@/lib/adminAuth";
 import nodemailer from "nodemailer";
+import bcrypt from "bcryptjs";
 
 const DATABASE_NAME = process.env.MONGODB_DB || "foodhub";
 
@@ -29,7 +30,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
         try {
-                const { name, email, company, reason } = await request.json();
+                const { name, email, company, reason, password } = await request.json();
 
                 if (!name || !email || !reason) {
                         return NextResponse.json({ error: "Name, email, and reason are required" }, { status: 400 });
@@ -50,6 +51,21 @@ export async function POST(request: NextRequest) {
                 const existing = await db.collection("admin_requests").findOne({ email: requestDoc.email, status: "pending" });
                 if (existing) {
                         return NextResponse.json({ error: "You already have a pending admin access request" }, { status: 409 });
+                }
+
+                const existingUser = await db.collection("users").findOne({ email: requestDoc.email });
+                if (!existingUser) {
+                        if (!password || String(password).length < 6) {
+                                return NextResponse.json({ error: "Password (minimum 6 characters) is required to create your account" }, { status: 400 });
+                        }
+
+                        const hashedPassword = await bcrypt.hash(String(password), 10);
+                        await db.collection("users").insertOne({
+                                name: requestDoc.name,
+                                email: requestDoc.email,
+                                password: hashedPassword,
+                                createdAt: new Date(),
+                        });
                 }
 
                 const result = await db.collection("admin_requests").insertOne(requestDoc);
