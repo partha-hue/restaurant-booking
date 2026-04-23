@@ -68,7 +68,7 @@ export default function SignupPage() {
         </h1>
         {isAdminFlow && (
           <p className="mb-4 text-center text-sm text-gray-600 dark:text-gray-400">
-            Sign up with your admin email and password. If this email is allowed, you will get admin access immediately.
+            Sign up with your email and password to create the admin account, then log in to manage the business.
           </p>
         )}
 

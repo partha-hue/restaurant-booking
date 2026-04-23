@@ -4,14 +4,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 
-function getAdminEmails() {
-  const raw = process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAILS || "";
-  return raw
-    .split(",")
-    .map((item) => item.trim().toLowerCase())
-    .filter(Boolean);
-}
-
 export async function POST(request: Request) {
   try {
     const { name, email, password, admin } = await request.json();
@@ -25,11 +17,6 @@ export async function POST(request: Request) {
     const client = await clientPromise;
     const db = client.db();
 
-    const adminEmails = getAdminEmails();
-    const approvedAdminCount = await db.collection("admin_access").countDocuments({ status: "approved" });
-    const shouldBootstrapApprove = approvedAdminCount === 0;
-    const canGrantAdminAccess = adminEmails.includes(normalizedEmail) || shouldBootstrapApprove;
-
     // Check if user already exists
     const existingUser = await db.collection("users").findOne({ email: normalizedEmail });
     if (existingUser) {
@@ -42,10 +29,6 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Invalid password" }, { status: 401 });
       }
 
-      if (!canGrantAdminAccess) {
-        return NextResponse.json({ error: "Admin signup is restricted to the configured admin email or the first bootstrap admin." }, { status: 403 });
-      }
-
       await db.collection("admin_access").updateOne(
         { email: normalizedEmail },
         {
@@ -55,7 +38,7 @@ export async function POST(request: Request) {
             company: "",
             status: "approved",
             approvedAt: new Date(),
-            approvedBy: shouldBootstrapApprove ? "bootstrap" : "signup",
+            approvedBy: "signup",
           },
         },
         { upsert: true }
@@ -85,10 +68,6 @@ export async function POST(request: Request) {
       return response;
     }
 
-    if (wantsAdminAccess && !canGrantAdminAccess) {
-      return NextResponse.json({ error: "Admin signup is restricted to the configured admin email or the first bootstrap admin." }, { status: 403 });
-    }
-
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -100,7 +79,7 @@ export async function POST(request: Request) {
       createdAt: new Date(),
     });
 
-    if (wantsAdminAccess || canGrantAdminAccess) {
+    if (wantsAdminAccess) {
       await db.collection("admin_access").updateOne(
         { email: normalizedEmail },
         {
@@ -110,7 +89,7 @@ export async function POST(request: Request) {
             company: "",
             status: "approved",
             approvedAt: new Date(),
-            approvedBy: shouldBootstrapApprove ? "bootstrap" : "signup",
+            approvedBy: "signup",
           },
         },
         { upsert: true }
@@ -155,7 +134,7 @@ Thank you for joining us!
       message: "Signup successful! Welcome to FoodHub.",
       token,
       user: { id: result.insertedId, name, email: normalizedEmail },
-      admin: wantsAdminAccess || canGrantAdminAccess,
+      admin: wantsAdminAccess,
     });
 
     // Optionally, set JWT cookie
