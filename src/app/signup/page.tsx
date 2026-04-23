@@ -37,10 +37,10 @@ export default function SignupPage() {
 
       // automatically sign in after sign-up with NextAuth credentials provider
       const signinResult = await signIn("credentials", {
-        redirect: false,
+        redirect: true,
         email: form.email,
         password: form.password,
-        callbackUrl: nextPath,
+        callbackUrl: nextPath || "/admin",
       });
 
       if (signinResult?.error) {
@@ -50,7 +50,6 @@ export default function SignupPage() {
 
       setLoading(false);
       setMessage({ type: "success", text: "Signup successful! Redirecting..." });
-      router.replace(nextPath);
     } catch (err) {
       setLoading(false);
       setMessage({ type: "error", text: "Something went wrong. Try again." });
