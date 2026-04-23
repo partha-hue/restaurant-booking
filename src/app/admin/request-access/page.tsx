@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -9,6 +9,12 @@ export default function AdminRequestAccessPage() {
         const [form, setForm] = useState({ name: "", email: "", password: "", company: "", reason: "" });
         const [loading, setLoading] = useState(false);
         const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
+        const [isNotApproved, setIsNotApproved] = useState(false);
+
+        useEffect(() => {
+                const params = new URLSearchParams(window.location.search);
+                setIsNotApproved(params.get("state") === "not-approved");
+        }, []);
 
         const handleSubmit = async (event: React.FormEvent) => {
                 event.preventDefault();
@@ -27,7 +33,11 @@ export default function AdminRequestAccessPage() {
                                 throw new Error(data.error || "Failed to submit request");
                         }
 
-                        setMessage({ type: "success", text: "Request submitted. Admin will review your access." });
+                        const successText = data?.autoApproved
+                                ? "Access approved instantly. Redirecting to admin login..."
+                                : "Request submitted. Admin will review your access.";
+
+                        setMessage({ type: "success", text: successText });
                         setForm({ name: "", email: "", password: "", company: "", reason: "" });
                         setTimeout(() => router.push("/login?next=%2Fadmin"), 1200);
                 } catch (error: any) {
@@ -50,6 +60,11 @@ export default function AdminRequestAccessPage() {
                                         <p className="mt-3 text-slate-600">
                                                 Admin accounts are approved manually for security. Submit your details and we’ll review access.
                                         </p>
+                                        {isNotApproved && (
+                                                <p className="mt-3 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                                                        Your account is signed in but not approved for admin yet. Submit or wait for approval below.
+                                                </p>
+                                        )}
                                 </div>
 
                                 <form onSubmit={handleSubmit} className="space-y-4">

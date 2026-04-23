@@ -68,7 +68,32 @@ export async function POST(request: NextRequest) {
                         });
                 }
 
+                const envAdminEmails = getAdminEmails().map((item) => item.toLowerCase());
+                const approvedAdminCount = await db.collection("admin_access").countDocuments({ status: "approved" });
+                const shouldBootstrapApprove = envAdminEmails.length === 0 && approvedAdminCount === 0;
+
+                if (shouldBootstrapApprove) {
+                        requestDoc.status = "approved";
+                }
+
                 const result = await db.collection("admin_requests").insertOne(requestDoc);
+
+                if (shouldBootstrapApprove) {
+                        await db.collection("admin_access").updateOne(
+                                { email: requestDoc.email },
+                                {
+                                        $set: {
+                                                name: requestDoc.name,
+                                                email: requestDoc.email,
+                                                company: requestDoc.company || "",
+                                                status: "approved",
+                                                approvedAt: new Date(),
+                                                approvedBy: "bootstrap",
+                                        },
+                                },
+                                { upsert: true }
+                        );
+                }
 
                 const adminEmails = getAdminEmails();
                 if (adminEmails.length > 0 && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
@@ -95,7 +120,10 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({
                         success: true,
                         requestId: result.insertedId,
-                        message: "Admin access request submitted successfully",
+                        message: shouldBootstrapApprove
+                                ? "Admin access approved. You can log in now."
+                                : "Admin access request submitted successfully",
+                        autoApproved: shouldBootstrapApprove,
                 });
         } catch (error) {
                 console.error("Admin request error:", error);

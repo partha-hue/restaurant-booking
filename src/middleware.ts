@@ -29,6 +29,13 @@ export async function middleware(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    if (token && !isAdmin) {
+      const requestUrl = new URL('/admin/request-access', request.url);
+      requestUrl.searchParams.set('state', 'not-approved');
+      requestUrl.searchParams.set('next', pathname);
+      return NextResponse.redirect(requestUrl);
+    }
+
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('next', pathname);
     return NextResponse.redirect(loginUrl);
