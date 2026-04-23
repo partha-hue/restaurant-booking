@@ -10,10 +10,12 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
   const [nextPath, setNextPath] = useState("/");
+  const [isAdminFlow, setIsAdminFlow] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const next = params.get("next");
+    setIsAdminFlow(params.get("admin") === "1");
     setNextPath(next && next.startsWith("/") ? next : "/");
   }, []);
 
@@ -25,7 +27,7 @@ export default function SignupPage() {
       const res = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, admin: isAdminFlow }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -61,7 +63,14 @@ export default function SignupPage() {
         onSubmit={handleSubmit}
         className="p-6 bg-white dark:bg-gray-900 shadow-md rounded-xl w-80 border border-gray-200 dark:border-gray-700 transition-colors duration-500"
       >
-        <h1 className="text-2xl font-bold mb-4 text-center text-blue-700 dark:text-blue-400">Create Account</h1>
+        <h1 className="text-2xl font-bold mb-4 text-center text-blue-700 dark:text-blue-400">
+          {isAdminFlow ? "Create Admin Account" : "Create Account"}
+        </h1>
+        {isAdminFlow && (
+          <p className="mb-4 text-center text-sm text-gray-600 dark:text-gray-400">
+            Sign up with your admin email and password. If this email is allowed, you will get admin access immediately.
+          </p>
+        )}
 
         <input
           type="text"
@@ -120,7 +129,9 @@ export default function SignupPage() {
         </button>
 
         <p className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400">
-          Admin access is reviewed separately. To request it, use the admin access request page after sign up.
+          {isAdminFlow
+            ? "After signing up, you can log in and open the admin panel right away."
+            : "Already have an account? Use the login page to continue."}
         </p>
 
         {message && (

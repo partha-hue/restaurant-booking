@@ -153,8 +153,8 @@ export default function HomePage() {
           <Link href="/restaurants" className="btn btn-primary btn-lg px-8 py-3">
             Explore Restaurants
           </Link>
-          <Link href="/admin/request-access" className="btn btn-outline btn-lg px-8 py-3">
-            Request Admin Access
+          <Link href="/signup?admin=1&next=%2Fadmin" className="btn btn-outline btn-lg px-8 py-3">
+            Admin Sign Up
           </Link>
         </div>
       </div>

@@ -12,9 +12,8 @@ function getAdminEmails() {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isPublicAdminRequestPage = pathname === '/admin/request-access';
   const isPublicAdminRequestApi = pathname === '/api/admin/requests';
-  const isAdminPath = (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) && !isPublicAdminRequestPage && !isPublicAdminRequestApi;
+  const isAdminPath = pathname.startsWith('/admin') || pathname.startsWith('/api/admin');
 
   if (!isAdminPath) {
     return NextResponse.next();
@@ -29,16 +28,10 @@ export async function middleware(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    if (token && !isAdmin) {
-      const requestUrl = new URL('/admin/request-access', request.url);
-      requestUrl.searchParams.set('state', 'not-approved');
-      requestUrl.searchParams.set('next', pathname);
-      return NextResponse.redirect(requestUrl);
-    }
-
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('next', pathname);
-    return NextResponse.redirect(loginUrl);
+    const signupUrl = new URL('/signup', request.url);
+    signupUrl.searchParams.set('admin', '1');
+    signupUrl.searchParams.set('next', pathname);
+    return NextResponse.redirect(signupUrl);
   }
 
   return NextResponse.next();
