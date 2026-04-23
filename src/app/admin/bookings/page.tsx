@@ -18,14 +18,14 @@ import toast, { Toaster } from "react-hot-toast";
 
 interface Booking {
       _id: string;
-      restaurantId: string;
-      restaurantName: string;
-      name: string;
-      phone: string;
-      date: string;
-      guests: number;
-      payment: string;
-      createdAt: string;
+      restaurantId?: string;
+      restaurantName?: string;
+      name?: string;
+      phone?: string;
+      date?: string;
+      guests?: number;
+      payment?: string;
+      createdAt?: string;
 }
 
 export default function AdminBookings() {
@@ -55,10 +55,11 @@ export default function AdminBookings() {
 
             // Apply search filter
             if (searchTerm) {
+                  const normalizedSearch = searchTerm.toLowerCase();
                   filtered = filtered.filter(booking =>
-                        booking.restaurantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        booking.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        booking.phone.includes(searchTerm)
+                        (booking.restaurantName || "").toLowerCase().includes(normalizedSearch) ||
+                        (booking.name || "").toLowerCase().includes(normalizedSearch) ||
+                        (booking.phone || "").includes(searchTerm)
                   );
             }
 
@@ -67,7 +68,7 @@ export default function AdminBookings() {
                   const now = new Date();
                   const bookingDate = new Date();
                   filtered = filtered.filter(booking => {
-                        const bookingDateTime = new Date(booking.date);
+                        const bookingDateTime = new Date(booking.date || "");
                         if (statusFilter === "upcoming") return bookingDateTime > now;
                         if (statusFilter === "past") return bookingDateTime < now;
                         return true;
@@ -116,7 +117,7 @@ export default function AdminBookings() {
 
       const getStatusBadge = (booking: Booking) => {
             const now = new Date();
-            const bookingDate = new Date(booking.date);
+            const bookingDate = new Date(booking.date || "");
 
             if (bookingDate > now) {
                   return (
@@ -133,7 +134,7 @@ export default function AdminBookings() {
             }
       };
 
-      const getPaymentBadge = (payment: string) => {
+      const getPaymentBadge = (payment?: string) => {
             const colors = {
                   offline: "bg-blue-100 text-blue-800",
                   gpay: "bg-green-100 text-green-800",
@@ -142,9 +143,11 @@ export default function AdminBookings() {
                   bank: "bg-gray-100 text-gray-800",
             };
 
+            const normalizedPayment = (payment || "bank").toLowerCase();
+
             return (
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors[payment as keyof typeof colors] || colors.bank}`}>
-                        {payment.charAt(0).toUpperCase() + payment.slice(1)}
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors[normalizedPayment as keyof typeof colors] || colors.bank}`}>
+                        {normalizedPayment.charAt(0).toUpperCase() + normalizedPayment.slice(1)}
                   </span>
             );
       };
@@ -227,7 +230,7 @@ export default function AdminBookings() {
                                                                   <div className="ml-4">
                                                                         <div className="flex items-center">
                                                                               <h4 className="text-sm font-medium text-gray-900">
-                                                                                    {booking.restaurantName}
+                                                                                    {booking.restaurantName || 'Restaurant'}
                                                                               </h4>
                                                                               <div className="ml-2 flex space-x-2">
                                                                                     {getStatusBadge(booking)}
@@ -236,13 +239,13 @@ export default function AdminBookings() {
                                                                         </div>
                                                                         <div className="mt-1 flex items-center text-sm text-gray-600">
                                                                               <User className="flex-shrink-0 mr-1 h-4 w-4" />
-                                                                              {booking.name}
+                                                                              {booking.name || 'Guest'}
                                                                               <Phone className="flex-shrink-0 ml-4 mr-1 h-4 w-4" />
-                                                                              {booking.phone}
+                                                                              {booking.phone || '-'}
                                                                         </div>
                                                                         <div className="mt-1 flex items-center text-sm text-gray-500">
                                                                               <Calendar className="flex-shrink-0 mr-1 h-4 w-4" />
-                                                                              {new Date(booking.date).toLocaleDateString()} • {booking.guests} guests
+                                                                              {booking.date ? new Date(booking.date).toLocaleDateString() : '-'} • {booking.guests ?? 0} guests
                                                                         </div>
                                                                   </div>
                                                             </div>
@@ -265,7 +268,7 @@ export default function AdminBookings() {
                                                             </div>
                                                       </div>
                                                       <div className="mt-2 text-xs text-gray-500">
-                                                            Booked on {new Date(booking.createdAt).toLocaleDateString()} at {new Date(booking.createdAt).toLocaleTimeString()}
+                                                            Booked on {booking.createdAt ? new Date(booking.createdAt).toLocaleDateString() : '-'} at {booking.createdAt ? new Date(booking.createdAt).toLocaleTimeString() : '-'}
                                                       </div>
                                                 </div>
                                           </li>

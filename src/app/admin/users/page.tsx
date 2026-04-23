@@ -19,12 +19,12 @@ import toast, { Toaster } from "react-hot-toast";
 
 interface User {
       _id: string;
-      name: string;
-      email: string;
+      name?: string;
+      email?: string;
       phone?: string;
       address?: string;
       image?: string;
-      createdAt: string;
+      createdAt?: string;
       lastLogin?: string;
       isActive?: boolean;
       role?: string;
@@ -57,9 +57,10 @@ export default function AdminUsers() {
 
             // Apply search filter
             if (searchTerm) {
+                  const normalizedSearch = searchTerm.toLowerCase();
                   filtered = filtered.filter(user =>
-                        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        (user.name || "").toLowerCase().includes(normalizedSearch) ||
+                        (user.email || "").toLowerCase().includes(normalizedSearch) ||
                         (user.phone && user.phone.includes(searchTerm))
                   );
             }
@@ -232,13 +233,13 @@ export default function AdminUsers() {
                                                                         <img
                                                                               className="h-10 w-10 rounded-full"
                                                                               src={user.image || '/default-avatar.png'}
-                                                                              alt={user.name}
+                                                                              alt={user.name || 'User avatar'}
                                                                         />
                                                                   </div>
                                                                   <div className="ml-4">
                                                                         <div className="flex items-center">
                                                                               <h4 className="text-sm font-medium text-gray-900">
-                                                                                    {user.name}
+                                                                                    {user.name || 'Unnamed User'}
                                                                               </h4>
                                                                               <div className="ml-2 flex space-x-2">
                                                                                     {getRoleBadge(user.role)}
@@ -247,7 +248,7 @@ export default function AdminUsers() {
                                                                         </div>
                                                                         <div className="mt-1 flex items-center text-sm text-gray-600">
                                                                               <Mail className="flex-shrink-0 mr-1 h-4 w-4" />
-                                                                              {user.email}
+                                                                              {user.email || 'No email'}
                                                                               {user.phone && (
                                                                                     <>
                                                                                           <Phone className="flex-shrink-0 ml-4 mr-1 h-4 w-4" />
@@ -257,7 +258,7 @@ export default function AdminUsers() {
                                                                         </div>
                                                                         <div className="mt-1 flex items-center text-sm text-gray-500">
                                                                               <Calendar className="flex-shrink-0 mr-1 h-4 w-4" />
-                                                                              Joined {new Date(user.createdAt).toLocaleDateString()}
+                                                                              Joined {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}
                                                                               {user.lastLogin && (
                                                                                     <> • Last login {new Date(user.lastLogin).toLocaleDateString()}</>
                                                                               )}

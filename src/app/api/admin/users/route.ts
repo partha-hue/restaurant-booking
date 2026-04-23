@@ -11,13 +11,28 @@ export async function GET() {
                 const client = await clientPromise;
                 const db = client.db(DATABASE_NAME);
 
+                const approvedAdmins = await db
+                        .collection("admin_access")
+                        .find({ status: "approved" }, { projection: { email: 1 } })
+                        .toArray();
+
+                const adminEmailSet = new Set(approvedAdmins.map((item: any) => String(item.email || "").toLowerCase()));
+
                 const users = await db
                         .collection("users")
-                        .find({})
+                        .find({}, { projection: { password: 0 } })
                         .sort({ createdAt: -1 })
                         .toArray();
 
-                return NextResponse.json(users);
+                const usersWithRoles = users.map((user: any) => {
+                        const email = String(user.email || "").toLowerCase();
+                        return {
+                                ...user,
+                                role: adminEmailSet.has(email) ? "admin" : (user.role || "user"),
+                        };
+                });
+
+                return NextResponse.json(usersWithRoles);
         } catch (err: any) {
                 const status = getAdminErrorStatus(err);
                 return NextResponse.json({ error: err?.message || "Failed to fetch users" }, { status });

@@ -10,6 +10,7 @@ import {
       Tag,
       BarChart3,
       Settings,
+      User,
       LogOut,
       Menu,
       X
@@ -26,6 +27,7 @@ const navigation = [
       { name: 'Users', href: '/admin/users', icon: Users },
       { name: 'Offers', href: '/admin/offers', icon: Tag },
       { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+      { name: 'Profile', href: '/admin/profile', icon: User },
       { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 

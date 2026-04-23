@@ -111,6 +111,14 @@ export const authOptions: NextAuthOptions = {
   events: {
     async signIn({ user, account, isNewUser }) {
       try {
+        const client = await clientPromise;
+        const db = client.db(ADMIN_DATABASE_NAME);
+        await db.collection("users").updateOne(
+          { email: user.email },
+          { $set: { lastLogin: new Date() } },
+          { upsert: false }
+        );
+
         const transporter = nodemailer.createTransport({
           service: "gmail",
           auth: {
