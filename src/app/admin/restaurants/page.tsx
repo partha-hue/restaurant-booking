@@ -17,8 +17,8 @@ import toast, { Toaster } from "react-hot-toast";
 
 interface Restaurant {
       _id: string;
-      name: string;
-      location: string;
+      name?: string;
+      location?: string;
       rating: number;
       details: string;
       image?: string;
@@ -47,10 +47,12 @@ export default function AdminRestaurants() {
       }, [status]);
 
       useEffect(() => {
-            const filtered = restaurants.filter(restaurant =>
-                  restaurant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  restaurant.location.toLowerCase().includes(searchTerm.toLowerCase())
-            );
+            const normalizedSearch = searchTerm.toLowerCase();
+            const filtered = restaurants.filter((restaurant) => {
+                  const name = (restaurant.name || "").toLowerCase();
+                  const location = (restaurant.location || "").toLowerCase();
+                  return name.includes(normalizedSearch) || location.includes(normalizedSearch);
+            });
             setFilteredRestaurants(filtered);
       }, [restaurants, searchTerm]);
 
@@ -155,7 +157,7 @@ export default function AdminRestaurants() {
                                           <div className="relative">
                                                 <img
                                                       src={restaurant.image || '/layer1.jpg'}
-                                                      alt={restaurant.name}
+                                                      alt={restaurant.name || 'Restaurant image'}
                                                       className="w-full h-48 object-cover"
                                                 />
                                                 <div className="absolute top-2 right-2">
@@ -171,13 +173,13 @@ export default function AdminRestaurants() {
                                           <div className="p-6">
                                                 <div className="flex items-center justify-between mb-2">
                                                       <h3 className="text-lg font-medium text-gray-900 truncate">
-                                                            {restaurant.name}
+                                                            {restaurant.name || 'Unnamed Restaurant'}
                                                       </h3>
                                                 </div>
 
                                                 <div className="flex items-center text-sm text-gray-500 mb-3">
                                                       <MapPin className="h-4 w-4 mr-1" />
-                                                      {restaurant.location}
+                                                      {restaurant.location || 'Location not provided'}
                                                 </div>
 
                                                 <p className="text-sm text-gray-600 line-clamp-2 mb-4">
