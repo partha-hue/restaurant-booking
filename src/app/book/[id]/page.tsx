@@ -57,6 +57,10 @@ export default function BookRestaurantPage() {
     mode: 'onChange',
   });
 
+  const watchedName = watch('name');
+  const watchedPhone = watch('phone');
+  const watchedDate = watch('date');
+  const watchedGuests = watch('guests');
   const watchedPayment = watch('payment');
 
   useEffect(() => {
@@ -120,6 +124,19 @@ export default function BookRestaurantPage() {
 
   const prevStep = () => setStep(step - 1);
 
+  const stepMeta = [
+    { id: 1, title: 'Review', subtitle: 'Restaurant' },
+    { id: 2, title: 'Details', subtitle: 'Guest info' },
+    { id: 3, title: 'Payment', subtitle: 'Confirm' },
+  ];
+
+  const formatDate = (value?: string) => {
+    if (!value) return 'Select a date';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
   if (success) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 flex items-center justify-center px-4">
@@ -159,13 +176,39 @@ export default function BookRestaurantPage() {
         <div className="text-sm opacity-75">Step {step} of 3</div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="px-6 mb-8">
-        <div className="w-full bg-white/20 rounded-full h-2">
+      {/* Progress Bar + Stepper */}
+      <div className="px-6 mb-8 space-y-4">
+        <div className="w-full bg-white/20 rounded-full h-2 overflow-hidden">
           <div
             className="bg-yellow-400 h-2 rounded-full transition-all duration-500"
             style={{ width: `${(step / 3) * 100}%` }}
-          ></div>
+          />
+        </div>
+
+        <div className="grid grid-cols-3 gap-3 text-xs sm:text-sm">
+          {stepMeta.map((item) => {
+            const active = step === item.id;
+            const completed = step > item.id;
+            return (
+              <div
+                key={item.id}
+                className={`rounded-2xl border px-3 py-3 text-center transition-all ${active
+                  ? 'border-yellow-400 bg-yellow-400/20 text-white'
+                  : completed
+                    ? 'border-green-400/40 bg-green-500/10 text-white'
+                    : 'border-white/15 bg-white/5 text-white/65'
+                  }`}
+              >
+                <div className="mb-1 flex items-center justify-center gap-2">
+                  <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${active ? 'bg-yellow-400 text-black' : completed ? 'bg-green-400 text-black' : 'bg-white/15 text-white'}`}>
+                    {completed ? '✓' : item.id}
+                  </span>
+                  <span className="font-semibold">{item.title}</span>
+                </div>
+                <div className="opacity-80">{item.subtitle}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -222,20 +265,28 @@ export default function BookRestaurantPage() {
                       <h2 className="text-3xl font-bold">{restaurant.name}</h2>
                       <p className="mt-3 text-white/75 leading-7">{restaurant.details}</p>
 
-                      <div className="mt-6 grid grid-cols-2 gap-3 text-sm">
+                      <div className="mt-6 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
                         <div className="rounded-2xl bg-white/10 p-4">
                           <div className="text-white/60">Guests</div>
-                          <div className="mt-1 text-lg font-semibold">Up to 20</div>
+                          <div className="mt-1 text-lg font-semibold">{watchedGuests || 1}</div>
                         </div>
                         <div className="rounded-2xl bg-white/10 p-4">
-                          <div className="text-white/60">Availability</div>
-                          <div className="mt-1 text-lg font-semibold">Today</div>
+                          <div className="text-white/60">Booking date</div>
+                          <div className="mt-1 text-sm font-semibold leading-5">{formatDate(watchedDate)}</div>
+                        </div>
+                        <div className="rounded-2xl bg-white/10 p-4">
+                          <div className="text-white/60">Guest name</div>
+                          <div className="mt-1 text-sm font-semibold leading-5">{watchedName || 'Not entered yet'}</div>
+                        </div>
+                        <div className="rounded-2xl bg-white/10 p-4">
+                          <div className="text-white/60">Contact</div>
+                          <div className="mt-1 text-sm font-semibold leading-5">{watchedPhone || 'Pending'}</div>
                         </div>
                       </div>
 
                       <div className="mt-6 rounded-2xl bg-black/20 p-4">
                         <p className="text-sm text-white/75">
-                          Step 1 is a quick review. Next you will add guest details and choose a payment method.
+                          Step 1 is a quick review. Continue to add guest details and then confirm the booking.
                         </p>
                       </div>
                     </div>
@@ -319,7 +370,14 @@ export default function BookRestaurantPage() {
                   <button
                     key={method.value}
                     type="button"
-                    onClick={() => setValue('payment', method.value)}
+                    onClick={() => {
+                      setValue('payment', method.value, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                        shouldTouch: true,
+                      });
+                      trigger('payment');
+                    }}
                     className={`p-4 rounded-xl border-2 transition-all hover:scale-105 ${watchedPayment === method.value
                       ? 'border-yellow-400 bg-yellow-400/20'
                       : 'border-white/30 bg-white/10 hover:bg-white/20'
@@ -368,7 +426,7 @@ export default function BookRestaurantPage() {
               <button
                 type="button"
                 onClick={handleSubmit(onSubmit)}
-                disabled={loading || !isValid}
+                disabled={loading || !watchedPayment || !isValid}
                 className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold transition-all ml-auto disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Confirming...' : 'Confirm Booking'}
