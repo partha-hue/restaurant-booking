@@ -90,6 +90,7 @@ export async function PUT(request: Request) {
                         .collection("admin_access")
                         .findOne({ email, status: "approved" });
 
+                        
                 return NextResponse.json({
                         success: true,
                         profile: {

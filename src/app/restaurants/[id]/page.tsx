@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { useCart } from "@/context/CartContext";
 
 type Restaurant = {
   _id: string;
@@ -13,6 +14,7 @@ type Restaurant = {
 
 export default function RestaurantDetailsPage({ params }: { params: { id: string } }) {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const { addItem } = useCart();
   useEffect(() => {
     fetch('/api/restaurants')
       .then(res => res.json())
@@ -132,12 +134,27 @@ export default function RestaurantDetailsPage({ params }: { params: { id: string
       <div className="mb-6 w-full max-w-md">
         <h2 className="text-lg font-bold text-black mb-2">Menu Highlights</h2>
         <ul className="divide-y">
-          {extraInfo.menu.map(item => (
-            <li key={item.name} className="flex justify-between py-2 text-gray-900">
-              <span>{item.name}</span>
-              <span className="font-bold">{item.price}</span>
-            </li>
-          ))}
+          {extraInfo.menu.map(item => {
+            const priceNumber = Number(String(item.price).replace(/[₹,\s]/g, "").replace(/[^0-9.]/g, "")) || 0;
+            const itemId = `${restaurant._id}-${item.name}`;
+            return (
+              <li key={item.name} className="flex items-center justify-between py-2 text-gray-900">
+                <div>
+                  <div>{item.name}</div>
+                  <div className="text-sm text-gray-500">{item.description}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="font-bold">₹{priceNumber.toFixed(2)}</div>
+                  <button
+                    className="ml-2 px-3 py-1 bg-green-600 text-white rounded"
+                    onClick={() => addItem({ id: itemId, name: item.name, price: priceNumber, qty: 1, restaurantId: restaurant._id, restaurantName: restaurant.name, meta: { restaurantName: restaurant.name } })}
+                  >
+                    Add
+                  </button>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       </div>
       <Link href={`/book/${restaurant._id}`} className="px-4 py-2 text-blue bg-blue-400 btn btn-ghost btn-dash btn-error w-full max-w-md block text-center">Book This Restaurant</Link>

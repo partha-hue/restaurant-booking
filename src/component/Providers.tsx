@@ -2,6 +2,7 @@
 
 import { ThemeProvider } from "@/component/Themeprovider";
 import { SessionProvider } from "next-auth/react";
+import { CartProvider } from "@/context/CartContext";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -37,7 +38,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             </p>
           </div>
         )}
-        {children}
+        <CartProvider>
+          {children}
+        </CartProvider>
       </ThemeProvider>
     </SessionProvider>
   );
