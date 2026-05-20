@@ -127,7 +127,7 @@ export default function HomePage() {
             <Link href="/bookings" className="btn btn-ghost w-full justify-start" onClick={() => setSidebarOpen(false)}>Bookings</Link>
           </li>
           <li>
-            <Link href="/profile" className="btn btn-ghost w-full justify-start" onClick={() => setSidebarOpen(false)}>Profile</Link>
+            <Link href="/userprofile" className="btn btn-ghost w-full justify-start" onClick={() => setSidebarOpen(false)}>Profile</Link>
           </li>
           <li>
             <button

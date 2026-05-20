@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
+import { useSession } from "next-auth/react";
 import { Moon, Sun, ShoppingCart, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
@@ -16,17 +17,32 @@ import {
 } from "../components/ui/dropdown-menu";
 
 export default function Navbar() {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
+  const { data: session } = useSession();
   const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { totalItems } = useCart();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = (mounted ? resolvedTheme : "system") === "dark";
+  const handleProfileClick = () => {
+    if (session?.user) {
+      router.push("/userprofile");
+      return;
+    }
+    router.push("/login?callbackUrl=/userprofile");
+  };
 
   return (
     <>
@@ -68,13 +84,13 @@ export default function Navbar() {
             {/* Theme Switch */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="relative w-10 h-10 p-2">
+                <Button type="button" variant="outline" size="icon" className="relative w-10 h-10 p-2">
                   <Sun
-                    className={`absolute h-5 w-5 transition-all ${theme === "dark" ? "scale-0 rotate-90" : "scale-100 rotate-0"
+                    className={`absolute h-5 w-5 transition-all ${isDark ? "scale-0 rotate-90" : "scale-100 rotate-0"
                       }`}
                   />
                   <Moon
-                    className={`absolute h-5 w-5 transition-all ${theme === "dark" ? "scale-100 rotate-0" : "scale-0 rotate-90"
+                    className={`absolute h-5 w-5 transition-all ${isDark ? "scale-100 rotate-0" : "scale-0 rotate-90"
                       }`}
                   />
                   <span className="sr-only">Toggle theme</span>
@@ -87,8 +103,8 @@ export default function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
             {/* Quick toggle for immediate theme change */}
-            <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="ml-1">
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            <Button type="button" variant="ghost" size="icon" onClick={() => setTheme(isDark ? "light" : "dark")} className="ml-1">
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
 
             {/* Cart */}
@@ -106,12 +122,12 @@ export default function Navbar() {
             {/* Profile Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="w-10 h-10 rounded-full p-1">
+                <Button type="button" variant="ghost" size="icon" className="w-10 h-10 rounded-full p-1" onClick={handleProfileClick}>
                   <User className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => router.push("/userprofile")}>Profile</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleProfileClick}>Profile</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push("/settings")}>Settings</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push("/logout")}>Logout</DropdownMenuItem>
               </DropdownMenuContent>
@@ -120,6 +136,7 @@ export default function Navbar() {
             {/* Mobile Menu Button */}
             <div className="md:hidden">
               <Button
+                type="button"
                 variant="outline"
                 size="icon"
                 onClick={() => setSidebarOpen(true)}
@@ -168,11 +185,12 @@ export default function Navbar() {
           </li>
           <li>
             <Button
+              type="button"
               variant="outline"
               className="w-full flex items-center justify-start"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              onClick={() => setTheme(isDark ? "light" : "dark")}
             >
-              {theme === "dark" ? "Light Mode" : "Dark Mode"}
+              {isDark ? "Light Mode" : "Dark Mode"}
             </Button>
           </li>
         </ul>
