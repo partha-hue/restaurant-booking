@@ -7,10 +7,11 @@ import { authOptions } from "@/lib/authOptions";
 export async function GET(req: Request) {
         try {
                 const session = await getServerSession(authOptions as any);
-                if (!session?.user?.id) return NextResponse.json({ items: [] });
+                const s = session as any;
+                if (!s?.user?.id) return NextResponse.json({ items: [] });
 
                 await dbConnect();
-                const existing = await Cart.findOne({ userId: session.user.id });
+                const existing = await Cart.findOne({ userId: s.user.id });
                 return NextResponse.json({ items: existing?.items || [] });
         } catch (error) {
                 console.error("GET cart error:", error);
@@ -21,7 +22,8 @@ export async function GET(req: Request) {
 export async function PUT(req: Request) {
         try {
                 const session = await getServerSession(authOptions as any);
-                if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+                const s = session as any;
+                if (!s?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
                 const body = await req.json();
                 const { items } = body;
@@ -29,7 +31,7 @@ export async function PUT(req: Request) {
 
                 await dbConnect();
                 const updated = await Cart.findOneAndUpdate(
-                        { userId: session.user.id },
+                        { userId: s.user.id },
                         { items, updatedAt: new Date() },
                         { upsert: true, new: true }
                 );
@@ -44,10 +46,11 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
         try {
                 const session = await getServerSession(authOptions as any);
-                if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+                const s = session as any;
+                if (!s?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
                 await dbConnect();
-                await Cart.deleteOne({ userId: session.user.id });
+                await Cart.deleteOne({ userId: s.user.id });
                 return NextResponse.json({ success: true });
         } catch (error) {
                 console.error("DELETE cart error:", error);
