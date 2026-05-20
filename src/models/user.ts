@@ -7,6 +7,7 @@ export interface IUser extends Document {
   image?: string;
   phone?: string;
   address?: string;
+  twoFactorEnabled?: boolean;
   createdAt?: Date;
 }
 
@@ -17,6 +18,7 @@ const UserSchema = new Schema<IUser>({
   image: { type: String, default: "/default-avatar.png" },
   phone: { type: String },
   address: { type: String },
+  twoFactorEnabled: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
 

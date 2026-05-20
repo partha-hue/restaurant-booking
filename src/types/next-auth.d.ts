@@ -8,6 +8,9 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
       isAdmin?: boolean;
+      phone?: string | null;
+      address?: string | null;
+      twoFactorEnabled?: boolean;
     } & DefaultSession["user"];
     provider?: string;
     accessToken?: string;
