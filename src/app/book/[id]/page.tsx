@@ -48,6 +48,8 @@ export default function BookRestaurantPage() {
   const [step, setStep] = useState(1);
   const [success, setSuccess] = useState(false);
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [restaurantLoading, setRestaurantLoading] = useState(true);
+  const [restaurantError, setRestaurantError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const { register, handleSubmit, formState: { errors, isValid }, watch, setValue, trigger } = useForm<BookingFormData>({
@@ -59,9 +61,18 @@ export default function BookRestaurantPage() {
 
   useEffect(() => {
     if (id) {
+      setRestaurantLoading(true);
+      setRestaurantError(null);
       fetch(`/api/restaurants/${id}`)
         .then((res) => res.json())
-        .then((data) => setRestaurant(data));
+        .then((data) => {
+          setRestaurant(data);
+          if (!data) {
+            setRestaurantError('Restaurant details are not available right now.');
+          }
+        })
+        .catch(() => setRestaurantError('Failed to load restaurant details.'))
+        .finally(() => setRestaurantLoading(false));
     }
   }, [id]);
 
@@ -88,7 +99,7 @@ export default function BookRestaurantPage() {
       toast.success('Booking confirmed successfully!');
       setSuccess(true);
 
-      setTimeout(() => router.push('/bookings'), 2000);
+      setTimeout(() => router.push('/bookings'), 1800);
     } catch (error) {
       toast.error('Failed to confirm booking. Please try again.');
     } finally {
@@ -111,15 +122,23 @@ export default function BookRestaurantPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 flex items-center justify-center px-4">
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center shadow-2xl"
+          className="bg-white/95 dark:bg-gray-800 rounded-2xl p-8 text-center shadow-2xl w-full max-w-md"
         >
           <div className="text-6xl mb-4">🎉</div>
           <h2 className="text-2xl font-bold text-green-600 mb-2">Booking Confirmed!</h2>
-          <p className="text-gray-600 dark:text-gray-300">Redirecting to your bookings...</p>
+          <p className="text-gray-600 dark:text-gray-300 mb-4">Your reservation is saved. Redirecting to your bookings...</p>
+          <div className="h-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-green-500 rounded-full"
+              initial={{ width: '0%' }}
+              animate={{ width: '100%' }}
+              transition={{ duration: 1.6, ease: 'easeInOut' }}
+            />
+          </div>
         </motion.div>
       </div>
     );
@@ -161,21 +180,72 @@ export default function BookRestaurantPage() {
           className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl"
         >
           {/* Step 1: Restaurant Details */}
-          {step === 1 && restaurant && (
-            <div className="text-center">
-              <motion.img
-                src={restaurant.image || '/layer1.jpg'}
-                alt={restaurant.name}
-                className="w-32 h-32 object-cover rounded-full mx-auto mb-6 shadow-lg"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-              />
-              <h1 className="text-3xl font-bold mb-2">{restaurant.name}</h1>
-              <p className="text-white/80 mb-4">{restaurant.details}</p>
-              <div className="flex justify-center gap-4 text-sm">
-                <span className="bg-white/20 px-3 py-1 rounded-full">{restaurant.location}</span>
-                <span className="bg-yellow-400 text-black px-3 py-1 rounded-full">⭐ {restaurant.rating}</span>
+          {step === 1 && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-white/80">
+                  Reservation preview
+                </span>
+                <h1 className="mt-4 text-3xl font-bold">Review your table booking</h1>
+                <p className="mt-2 text-white/75">
+                  Confirm the restaurant details before moving to guest and payment information.
+                </p>
               </div>
+
+              {restaurantLoading ? (
+                <div className="rounded-2xl border border-white/10 bg-white/10 p-6 animate-pulse">
+                  <div className="h-44 rounded-xl bg-white/15 mb-6" />
+                  <div className="h-7 w-2/3 mx-auto rounded bg-white/15 mb-3" />
+                  <div className="h-4 w-full rounded bg-white/10 mb-2" />
+                  <div className="h-4 w-5/6 mx-auto rounded bg-white/10 mb-6" />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="h-10 rounded-lg bg-white/10" />
+                    <div className="h-10 rounded-lg bg-white/10" />
+                  </div>
+                </div>
+              ) : restaurant ? (
+                <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/10 shadow-2xl backdrop-blur-xl">
+                  <div className="grid gap-0 md:grid-cols-[1.1fr_0.9fr]">
+                    <motion.img
+                      src={restaurant.image || '/layer1.jpg'}
+                      alt={restaurant.name || 'Restaurant'}
+                      className="h-72 w-full object-cover md:h-full"
+                      initial={{ scale: 1.05, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.45 }}
+                    />
+                    <div className="p-6 md:p-8">
+                      <div className="mb-4 flex flex-wrap gap-2 text-sm">
+                        <span className="rounded-full bg-white/10 px-3 py-1">{restaurant.location || 'Premium location'}</span>
+                        <span className="rounded-full bg-yellow-400 px-3 py-1 text-black font-semibold">⭐ {restaurant.rating ?? '4.8'}</span>
+                      </div>
+                      <h2 className="text-3xl font-bold">{restaurant.name}</h2>
+                      <p className="mt-3 text-white/75 leading-7">{restaurant.details}</p>
+
+                      <div className="mt-6 grid grid-cols-2 gap-3 text-sm">
+                        <div className="rounded-2xl bg-white/10 p-4">
+                          <div className="text-white/60">Guests</div>
+                          <div className="mt-1 text-lg font-semibold">Up to 20</div>
+                        </div>
+                        <div className="rounded-2xl bg-white/10 p-4">
+                          <div className="text-white/60">Availability</div>
+                          <div className="mt-1 text-lg font-semibold">Today</div>
+                        </div>
+                      </div>
+
+                      <div className="mt-6 rounded-2xl bg-black/20 p-4">
+                        <p className="text-sm text-white/75">
+                          Step 1 is a quick review. Next you will add guest details and choose a payment method.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-red-400/30 bg-red-500/10 p-6 text-center text-white">
+                  <p className="font-semibold">{restaurantError || 'Restaurant details could not be loaded.'}</p>
+                </div>
+              )}
             </div>
           )}
 
@@ -248,6 +318,7 @@ export default function BookRestaurantPage() {
                 ].map((method) => (
                   <button
                     key={method.value}
+                    type="button"
                     onClick={() => setValue('payment', method.value)}
                     className={`p-4 rounded-xl border-2 transition-all hover:scale-105 ${watchedPayment === method.value
                       ? 'border-yellow-400 bg-yellow-400/20'
@@ -277,6 +348,7 @@ export default function BookRestaurantPage() {
           <div className="flex justify-between mt-8">
             {step > 1 && (
               <button
+                type="button"
                 onClick={prevStep}
                 className="px-6 py-3 bg-white/20 hover:bg-white/30 rounded-lg transition-all"
               >
@@ -285,6 +357,7 @@ export default function BookRestaurantPage() {
             )}
             {step < 3 && (
               <button
+                type="button"
                 onClick={nextStep}
                 className="px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-black rounded-lg font-semibold transition-all ml-auto"
               >
@@ -293,6 +366,7 @@ export default function BookRestaurantPage() {
             )}
             {step === 3 && (
               <button
+                type="button"
                 onClick={handleSubmit(onSubmit)}
                 disabled={loading || !isValid}
                 className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold transition-all ml-auto disabled:opacity-50 disabled:cursor-not-allowed"
