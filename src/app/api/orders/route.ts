@@ -7,6 +7,7 @@ import { authOptions } from "@/lib/authOptions";
 export async function POST(req: Request) {
         try {
                 const session = await getServerSession(authOptions as any);
+                const s = session as any;
                 const body = await req.json();
                 const { items, total } = body;
                 if (!items || !Array.isArray(items) || items.length === 0) {
@@ -18,7 +19,7 @@ export async function POST(req: Request) {
                 const order = new Order({
                         items: items.map((i: any) => ({ itemId: i.id, name: i.name, price: i.price, qty: i.qty, meta: i.meta })),
                         total,
-                        userId: session?.user?.id,
+                        userId: s?.user?.id,
                 });
                 const saved = await order.save();
 
