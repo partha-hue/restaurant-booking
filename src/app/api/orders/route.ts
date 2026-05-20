@@ -38,8 +38,9 @@ export async function GET(req: Request) {
 
                 if (mine === "true") {
                         const session = await getServerSession(authOptions as any);
-                        if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-                        const orders = await Order.find({ userId: session.user.id }).sort({ createdAt: -1 }).limit(100);
+                        const s = session as any;
+                        if (!s?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+                        const orders = await Order.find({ userId: s.user.id }).sort({ createdAt: -1 }).limit(100);
                         return NextResponse.json(orders);
                 }
 
