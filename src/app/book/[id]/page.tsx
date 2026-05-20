@@ -67,11 +67,13 @@ export default function BookRestaurantPage() {
     if (id) {
       setRestaurantLoading(true);
       setRestaurantError(null);
-      fetch(`/api/restaurants/${id}`)
+      fetch('/api/restaurants')
         .then((res) => res.json())
         .then((data) => {
-          setRestaurant(data);
-          if (!data) {
+          const restaurants = Array.isArray(data) ? data : [];
+          const found = restaurants.find((item: Restaurant) => String(item._id) === String(id)) || null;
+          setRestaurant(found);
+          if (!found) {
             setRestaurantError('Restaurant details are not available right now.');
           }
         })
@@ -81,13 +83,13 @@ export default function BookRestaurantPage() {
   }, [id]);
 
   const onSubmit = async (data: BookingFormData) => {
-    if (!restaurant) return;
+    if (!restaurant && !id) return;
 
     setLoading(true);
     try {
       const booking = {
         restaurantId: id,
-        restaurantName: restaurant.name,
+        restaurantName: restaurant?.name || 'Restaurant',
         ...data,
         createdAt: new Date().toISOString(),
       };
