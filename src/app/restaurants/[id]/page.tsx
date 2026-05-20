@@ -141,7 +141,6 @@ export default function RestaurantDetailsPage({ params }: { params: { id: string
               <li key={item.name} className="flex items-center justify-between py-2 text-gray-900">
                 <div>
                   <div>{item.name}</div>
-                  <div className="text-sm text-gray-500">{item.description}</div>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="font-bold">₹{priceNumber.toFixed(2)}</div>
